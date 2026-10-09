@@ -242,35 +242,61 @@ class MetrobusNav extends HTMLElement {
   }
 
   splitAnnouncementText(text){
-    const clean=String(text||'').trim();
+    const clean=String(text||'').replace(/\s+/g,' ').trim();
     if(!clean)return [];
     if(this.clientWidth>720)return [clean];
 
     const maxChars=Math.max(24,Math.floor((this.clientWidth-24)/6.4));
-    const sentences=clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map(s=>s.trim()).filter(Boolean)||[clean];
-    const frames=[];
+    const conjunctions=new Set(['a','ale','avšak','nebo','ani','protože','jelikož','poněvadž','že','aby','když','pokud','zatímco','který','která','které','kteří','co','takže','proto','tedy','přitom','ovšem']);
 
-    for(const sentence of sentences){
-      if(sentence.length<=maxChars){
-        frames.push(sentence);
-        continue;
+    const splitBest=(segment)=>{
+      const value=segment.trim();
+      if(!value)return [];
+      if(value.length<=maxChars)return [value];
+
+      const candidates=[];
+      const midpoint=value.length/2;
+      const minSide=Math.max(8,Math.floor(maxChars*.28));
+
+      const addCandidate=(index,priority,keepLeft=0)=>{
+        if(index<=minSide||value.length-index<=minSide)return;
+        candidates.push({index,priority,keepLeft,score:priority*1000-Math.abs(index-midpoint)});
+      };
+
+      for(let i=0;i<value.length;i++){
+        const ch=value[i];
+        if(ch==='.'||ch==='!'||ch==='?') addCandidate(i+1,5,0);
+        else if(ch===';'||ch===':') addCandidate(i+1,4,0);
+        else if(ch===',') addCandidate(i+1,3,0);
       }
 
-      const words=sentence.split(/\s+/);
-      let line='';
-      for(const word of words){
-        const candidate=line?`${line} ${word}`:word;
-        if(candidate.length<=maxChars||!line){
-          line=candidate;
-        }else{
-          frames.push(line);
-          line=word;
-        }
+      const wordRe=/\s+([\p{L}À-ž]+)\b/gu;
+      let match;
+      while((match=wordRe.exec(value))){
+        const word=match[1].toLocaleLowerCase('cs');
+        if(conjunctions.has(word)) addCandidate(match.index,2,0);
       }
-      if(line)frames.push(line);
-    }
 
-    return frames;
+      for(let i=1;i<value.length-1;i++){
+        if(value[i]===' ') addCandidate(i,1,0);
+      }
+
+      const fitting=candidates.filter(c=>c.index<=maxChars);
+      const chosen=(fitting.length?fitting:candidates).sort((a,b)=>b.score-a.score)[0];
+      if(!chosen){
+        const fallback=Math.min(maxChars,value.length-1);
+        const space=value.lastIndexOf(' ',fallback);
+        const cut=space>0?space:fallback;
+        return [value.slice(0,cut).trim(),...splitBest(value.slice(cut).trim())].filter(Boolean);
+      }
+
+      const left=value.slice(0,chosen.index).trim();
+      const right=value.slice(chosen.index).trim();
+      return [left,...splitBest(right)].filter(Boolean);
+    };
+
+    const sentenceParts=clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map(s=>s.trim()).filter(Boolean)||[clean];
+    return sentenceParts.flatMap(part=>splitBest(part));
   }
 
   getAnnouncementFrames(){
