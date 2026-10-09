@@ -1,7 +1,6 @@
 {
   "announcements": [
-    { "text": "2023 – V autobusech DPP začal hlásit Jan Vondráček" },
-    { "text": "1938 – Zastaven provoz Štramberk–Veřovice" }
+    { "text": "Na YouTube máme už 14 183 odběratelů! Všem vám moc děkujeme za podporu ❤️" }
   ],
   "main": [
     { "id": "metrobus", "label": "Metrobus", "url": "https://metrobus.cz/" },
