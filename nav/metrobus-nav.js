@@ -1,4 +1,8 @@
 const FALLBACK_CONFIG = {
+  announcements: [
+    { text: '2023 – V autobusech DPP začal hlásit Jan Vondráček' },
+    { text: '1938 – Zastaven provoz Štramberk–Veřovice' }
+  ],
   main: [
     { id: 'metrobus', label: 'Metrobus', url: 'https://metrobus.cz/' },
     { id: 'videa', label: 'Videa', url: 'https://metrobus.cz/' },
@@ -24,6 +28,7 @@ const styles = `
     --mb-nav-active-text: #25282d;
     --mb-nav-border: rgba(255,255,255,.12);
     --mb-nav-height: 38px;
+    --mb-announcement-height: 34px;
     display: block;
     position: relative;
     z-index: 10000;
@@ -32,6 +37,57 @@ const styles = `
   }
 
   * { box-sizing: border-box; }
+
+  .announcement-bar {
+    position: relative;
+    height: var(--mb-announcement-height);
+    overflow: hidden;
+    background: var(--mb-nav-bg);
+    color: var(--mb-nav-text);
+    border-bottom: 1px solid var(--mb-nav-border);
+  }
+
+  .announcement-inner {
+    position: relative;
+    width: min(100%, 1180px);
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 14px;
+    overflow: hidden;
+  }
+
+  .announcement-item {
+    position: absolute;
+    inset: 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    opacity: 0;
+    transform: translateY(72%) scale(.94);
+    filter: blur(.2px);
+    transition:
+      transform .34s cubic-bezier(.22,.8,.24,1),
+      opacity .26s ease,
+      filter .26s ease;
+    pointer-events: none;
+  }
+
+  .announcement-item.current {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+
+  .announcement-item.leaving {
+    opacity: 0;
+    transform: translateY(-72%) scale(.94);
+    filter: blur(.35px);
+  }
 
   .bar {
     position: relative;
@@ -97,7 +153,6 @@ const styles = `
     color: var(--mb-nav-active-text);
   }
 
-  /* Desktop */
   .desktop-nav {
     display: flex;
     align-items: stretch;
@@ -156,7 +211,6 @@ const styles = `
     justify-content: flex-start;
   }
 
-  /* Kompaktní navigace */
   .mobile-nav {
     display: none;
     width: 100%;
@@ -274,7 +328,20 @@ const styles = `
   }
 
   @media (max-width: 720px) {
-    :host { --mb-nav-height: 35px; }
+    :host {
+      --mb-nav-height: 35px;
+      --mb-announcement-height: 32px;
+    }
+
+    .announcement-inner { padding-inline: 8px; }
+
+    .announcement-item {
+      inset-inline: 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+    }
+
     .inner { padding: 0 4px; }
     .desktop-nav { display: none; }
     .mobile-nav { display: flex; }
@@ -286,6 +353,8 @@ const styles = `
       padding-inline: 7px;
       font-size: 12.5px;
     }
+
+    .announcement-item { font-size: 11px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -307,6 +376,8 @@ class MetrobusNav extends HTMLElement {
     this.appsOpen = false;
     this.hiddenCompactIds = new Set();
     this.resizeObserver = null;
+    this.announcementIndex = 0;
+    this.announcementTimer = null;
   }
 
   connectedCallback() {
@@ -318,11 +389,13 @@ class MetrobusNav extends HTMLElement {
     this.resizeObserver.observe(this);
 
     document.fonts?.ready.then(() => this.scheduleCompactLayout());
+    this.startAnnouncementRotation();
   }
 
   disconnectedCallback() {
     document.removeEventListener('click', this.handleOutsideClick);
     this.resizeObserver?.disconnect();
+    clearInterval(this.announcementTimer);
   }
 
   attributeChangedCallback() {
@@ -351,8 +424,10 @@ class MetrobusNav extends HTMLElement {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const config = await response.json();
       if (!Array.isArray(config.main) || !Array.isArray(config.apps)) throw new Error('Invalid config');
-      this.config = config;
+      this.config = { ...FALLBACK_CONFIG, ...config };
+      this.announcementIndex = 0;
       this.render();
+      this.startAnnouncementRotation();
     } catch (error) {
       console.warn('[metrobus-nav] config.json se nepodařilo načíst, používám fallback.', error);
     }
@@ -377,6 +452,49 @@ class MetrobusNav extends HTMLElement {
           </div>
         </div>`;
     }).join('');
+  }
+
+  renderAnnouncementBar() {
+    const items = Array.isArray(this.config.announcements) ? this.config.announcements : [];
+    if (!items.length) return '';
+
+    return `
+      <div class="announcement-bar" aria-live="polite" aria-label="Aktuální informace Metrobusu">
+        <div class="announcement-inner">
+          ${items.map((item, index) => `
+            <div class="announcement-item${index === this.announcementIndex ? ' current' : ''}" data-announcement-index="${index}">
+              ${item.text || ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  startAnnouncementRotation() {
+    clearInterval(this.announcementTimer);
+    const items = Array.isArray(this.config.announcements) ? this.config.announcements : [];
+    if (items.length < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    this.announcementTimer = setInterval(() => this.rotateAnnouncement(), 4200);
+  }
+
+  rotateAnnouncement() {
+    const items = [...this.shadowRoot.querySelectorAll('.announcement-item')];
+    if (items.length < 2) return;
+
+    const current = items[this.announcementIndex];
+    const nextIndex = (this.announcementIndex + 1) % items.length;
+    const next = items[nextIndex];
+
+    current?.classList.remove('current');
+    current?.classList.add('leaving');
+    next?.classList.remove('leaving');
+
+    requestAnimationFrame(() => next?.classList.add('current'));
+
+    window.setTimeout(() => current?.classList.remove('leaving'), 380);
+    this.announcementIndex = nextIndex;
   }
 
   renderMobileInline() {
@@ -452,6 +570,7 @@ class MetrobusNav extends HTMLElement {
   render() {
     this.shadowRoot.innerHTML = `
       <style>${styles}</style>
+      ${this.renderAnnouncementBar()}
       <nav class="bar${this.moreOpen ? ' more-open' : ''}" aria-label="Metrobus – globální navigace">
         <div class="inner">
           <div class="desktop-nav">
