@@ -1,9 +1,10 @@
 {
   "main": [
+    { "id": "metrobus", "label": "Metrobus", "url": "https://metrobus.cz/" },
     { "id": "videa", "label": "Videa", "url": "https://metrobus.cz/" },
     { "id": "studio", "label": "Studio", "url": "https://metrobus.cz/studio" },
-    { "id": "apps", "label": "Aplikace", "type": "apps" },
     { "id": "forendors", "label": "Forendors", "url": "https://www.forendors.cz/metrobus", "priority": true },
+    { "id": "apps", "label": "Aplikace", "type": "apps" },
     { "id": "odkazy", "label": "Odkazy", "url": "https://metrobus.cz/odkazy" }
   ],
   "apps": [
