@@ -123,8 +123,10 @@ const styles = `
     border-right: 1.5px solid currentColor;
     border-bottom: 1.5px solid currentColor;
     transform: rotate(45deg) translateY(-1px);
+    transform-origin: 65% 65%;
     margin-left: 7px;
     flex: 0 0 auto;
+    transition: transform .16s ease;
   }
 
   .dropdown {
@@ -201,8 +203,11 @@ const styles = `
     color: var(--mb-nav-blue);
   }
 
+  .more-wrap.open .more-toggle::after {
+    transform: rotate(225deg) translate(-1px, -1px);
+  }
+
   .more-panel {
-    display: none;
     position: absolute;
     top: 100%;
     left: 0;
@@ -214,9 +219,30 @@ const styles = `
     box-shadow: 0 12px 28px rgba(0,0,0,.24);
     padding: 3px 6px 5px;
     z-index: 2;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-5px);
+    clip-path: inset(0 0 100% 0);
+    transition:
+      opacity .12s ease-out,
+      transform .16s ease-out,
+      clip-path .16s ease-out,
+      visibility 0s linear .16s;
   }
 
-  .bar.more-open .more-panel { display: block; }
+  .bar.more-open .more-panel {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+    clip-path: inset(0 0 0 0);
+    transition:
+      opacity .12s ease-out,
+      transform .16s ease-out,
+      clip-path .16s ease-out,
+      visibility 0s;
+  }
 
   .more-panel .item {
     width: 100%;
@@ -262,7 +288,10 @@ const styles = `
   }
 
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { transition: none !important; }
+    *, *::before, *::after {
+      transition: none !important;
+      animation: none !important;
+    }
   }
 `;
 
@@ -300,10 +329,9 @@ class MetrobusNav extends HTMLElement {
   }
 
   handleOutsideClick = (event) => {
-    if (!event.composedPath().includes(this)) {
+    if (!event.composedPath().includes(this) && this.moreOpen) {
       this.moreOpen = false;
-      this.appsOpen = false;
-      this.render();
+      this.syncMoreState();
     }
   };
 
@@ -394,7 +422,6 @@ class MetrobusNav extends HTMLElement {
     const available = nav.clientWidth - moreWrap.offsetWidth;
     const hideOrder = ['odkazy', 'studio', 'videa'];
     const hidden = new Set();
-
     const currentWidth = () => inline.scrollWidth;
 
     for (const id of hideOrder) {
@@ -410,6 +437,15 @@ class MetrobusNav extends HTMLElement {
     this.shadowRoot.querySelectorAll('[data-overflow-id]').forEach(item => {
       item.dataset.overflowVisible = hidden.has(item.dataset.overflowId) ? 'true' : 'false';
     });
+  }
+
+  syncMoreState() {
+    const bar = this.shadowRoot.querySelector('.bar');
+    const wrap = this.shadowRoot.querySelector('.more-wrap');
+    const toggle = this.shadowRoot.querySelector('[data-action="more"]');
+    bar?.classList.toggle('more-open', this.moreOpen);
+    wrap?.classList.toggle('open', this.moreOpen);
+    toggle?.setAttribute('aria-expanded', String(this.moreOpen));
   }
 
   render() {
@@ -447,7 +483,7 @@ class MetrobusNav extends HTMLElement {
 
     this.shadowRoot.querySelector('[data-action="more"]')?.addEventListener('click', () => {
       this.moreOpen = !this.moreOpen;
-      this.render();
+      this.syncMoreState();
     });
 
     this.scheduleCompactLayout();
