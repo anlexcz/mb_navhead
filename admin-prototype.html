@@ -4,81 +4,153 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Metrobus Navhead – admin prototyp</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#25282d;--blue:#1fa8e8;--red:#e23a3a;--bg:#f4f5f6;--white:#fff;
-  --line:#d5d9dc;--muted:#6f767d;--soft:#eceff1;--ok:#19795a;
-  font-family:'Montserrat',Arial,sans-serif;color:#25282d;background:var(--bg)
+  --ink:#25282d;
+  --blue:#1fa8e8;
+  --red:#cf3f3f;
+  --bg:#f5f6f7;
+  --white:#fff;
+  --line:#d3d7da;
+  --muted:#71777d;
+  --soft:#eceff1;
+  --ok:#19795a;
+  font-family:Arial,"Helvetica Neue",sans-serif;
+  color:#25282d;
+  background:var(--bg)
 }
-*{box-sizing:border-box}html,body{margin:0;background:var(--bg)}button,input,select,textarea{font:inherit}button{cursor:pointer}
-.topbar{height:48px;background:var(--ink);color:#fff;border-bottom:3px solid var(--blue);display:flex;align-items:center;justify-content:space-between;padding:0 18px;gap:18px}
-.brand{font-size:14px;font-weight:700;letter-spacing:-.02em;white-space:nowrap}.brand span{opacity:.62;font-weight:600}.dot{color:var(--red)}
-.userbar{display:flex;align-items:center;gap:12px;font-size:11px}.userbar button{border:0;background:none;color:#fff;padding:4px 0;opacity:.72}.userbar button:hover{opacity:1}
-.preview{background:#e7eaec;border-bottom:1px solid #c8cdd1;padding:10px 16px 12px}
-.preview-inner{max-width:1040px;margin:auto}.preview-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:7px}
-.preview-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#596168}
-.segment{display:flex;border:1px solid #b7bdc2;background:#fff}.segment button{border:0;border-right:1px solid #d5d9dc;background:#fff;padding:5px 9px;font-size:10px;font-weight:600;color:#4d555c}.segment button:last-child{border-right:0}.segment button.active{background:var(--ink);color:#fff}
-.preview-wrap{display:flex;justify-content:center}.preview-frame{width:100%;transition:width .15s ease}.preview-frame.tablet{width:768px}.preview-frame.mobile{width:390px}.preview.hidden .preview-wrap{display:none}
-.mock-ann{height:25px;background:var(--ink);color:#fff;border-bottom:1px solid rgba(255,255,255,.13);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;padding:0 8px}
-.mock-nav{height:31px;background:var(--ink);border-bottom:3px solid var(--blue);display:flex;align-items:stretch;justify-content:center;color:#fff;overflow:hidden}.mock-nav span{display:flex;align-items:center;padding:0 12px;font-size:10px;font-weight:600;white-space:nowrap}.mock-nav .active{background:var(--blue);color:var(--ink)}
-.tabs{background:#fff;border-bottom:1px solid var(--line)}.tabs-inner{max-width:1040px;margin:auto;display:flex;overflow:auto;padding:0 12px}.tab{border:0;background:#fff;color:#60676d;padding:10px 12px 9px;font-size:10px;font-weight:700;white-space:nowrap;border-bottom:2px solid transparent}.tab.active{color:var(--ink);border-bottom-color:var(--blue)}
-main{max-width:1040px;margin:auto;padding:18px 16px 50px}.section{display:none}.section.active{display:block}
-.section-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px}.section-head h1{font-size:20px;line-height:1;margin:0;font-weight:700;letter-spacing:-.03em}.section-head p{font-size:11px;color:var(--muted);margin:5px 0 0;line-height:1.45}.meta{font-size:10px;color:#697078;white-space:nowrap}
-.actions{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap}.actions-left,.actions-right{display:flex;gap:6px;flex-wrap:wrap}
-.btn{border:1px solid #aeb5ba;background:#fff;color:#2f3438;padding:7px 10px;font-size:10px;font-weight:700;border-radius:0}.btn:hover{background:#f2f4f5}.btn-dark{background:var(--ink);border-color:var(--ink);color:#fff}.btn-blue{background:var(--blue);border-color:var(--blue);color:var(--ink)}.btn-danger{color:#a92d2d;border-color:#d8a3a3}
-.status{display:flex;align-items:center;gap:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:8px 0;margin-bottom:12px;font-size:10px;color:#646b71}.status strong{color:var(--ink)}.status .dotsep{width:3px;height:3px;background:#9ba1a6;border-radius:50%}
-.menu-list{display:flex;flex-direction:column;gap:5px}.menu-item{background:#fff;border:1px solid #c6ccd0}.menu-row{min-height:40px;display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:center}.drag{height:100%;border:0;border-right:1px solid #d6dade;background:#f0f2f3;color:#747b81;font-size:14px;cursor:grab}.item-main{min-width:0;padding:0 10px}.item-main strong{font-size:11px;font-weight:700;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.item-main small{font-size:9px;color:#8a9095;display:block;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.item-actions{display:flex;height:40px}.item-actions button{border:0;border-left:1px solid #e0e3e5;background:#fff;padding:0 10px;font-size:9px;font-weight:600;color:#596168}.children{padding:5px 0 5px 22px;background:#f6f7f8;border-top:1px solid #e2e5e7}.children .menu-item{margin-bottom:5px}.children .menu-item:last-child{margin-bottom:0}
-.badge{display:inline-block;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;background:#e8ecee;color:#687078;padding:2px 4px;margin-left:5px}.badge.group{background:#d8eef8;color:#1c627e}.badge.ok{background:#dcefe9;color:#176147}.badge.scheduled{background:#fff0c7;color:#765400}.badge.off{background:#e6e8ea;color:#5d646a}
-.editor{display:none;border-top:1px solid #dde1e3;background:#fafbfb;padding:10px}.menu-item.open>.editor{display:block}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.field{display:flex;flex-direction:column;gap:4px}.field.full{grid-column:1/-1}label{font-size:9px;font-weight:700;color:#626970}input,select,textarea{width:100%;border:1px solid #b8bec3;background:#fff;border-radius:0;padding:7px 8px;font-size:10px;color:#25282d;outline:none}input:focus,select:focus,textarea:focus{border-color:var(--blue)}textarea{min-height:88px;resize:vertical;line-height:1.4}.checkrow{display:flex;align-items:center;gap:7px;font-size:10px}.checkrow input{width:auto}
-.ann-card{background:#fff;border:1px solid #c6ccd0;margin-bottom:6px}.ann-top{display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:center;min-height:44px}.ann-copy{padding:0 10px;min-width:0}.ann-copy strong{display:block;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ann-copy small{font-size:9px;color:#858c91}.ann-editor{border-top:1px solid #dde1e3;background:#fafbfb;padding:10px}.html-tools{display:flex;gap:4px;margin-bottom:5px}.html-tools button{border:1px solid #b8bec3;background:#fff;min-width:28px;height:26px;font-size:9px;font-weight:700}
-.table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #d0d5d8;font-size:10px}.table th,.table td{padding:8px 9px;border-bottom:1px solid #e0e3e5;text-align:left}.table th{background:#f6f7f8;color:#6b7278;font-size:8px;text-transform:uppercase;letter-spacing:.04em}.table tr:last-child td{border-bottom:0}
-.toast{position:fixed;right:16px;bottom:16px;background:var(--ink);color:#fff;border-left:3px solid var(--blue);padding:9px 11px;font-size:10px;opacity:0;transform:translateY(8px);pointer-events:none;transition:.15s ease}.toast.show{opacity:1;transform:translateY(0)}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg)}
+body{font-size:14px}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+
+/* Preview je skutečně první věc na stránce – chová se jako navhead na běžném webu. */
+.preview{background:var(--ink);border-bottom:3px solid var(--blue)}
+.preview-frame{width:100%;margin:0 auto;transition:max-width .15s ease}
+.preview-frame.tablet{max-width:768px}
+.preview-frame.mobile{max-width:390px}
+.mock-ann{height:28px;color:#fff;border-bottom:1px solid rgba(255,255,255,.13);display:flex;align-items:center;justify-content:center;padding:0 10px;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden}
+.mock-nav{height:34px;display:flex;align-items:stretch;justify-content:center;color:#fff;overflow:hidden}
+.mock-nav span{display:flex;align-items:center;padding:0 13px;font-size:12px;font-weight:600;white-space:nowrap}
+.mock-nav .active{background:var(--blue);color:var(--ink)}
+.preview.hidden .preview-frame{display:none}
+
+.preview-tools{background:#fff;border-bottom:1px solid var(--line)}
+.preview-tools-inner{max-width:980px;margin:auto;min-height:34px;padding:4px 14px;display:flex;align-items:center;justify-content:flex-end;gap:8px}
+.preview-label{margin-right:auto;font-size:11px;color:#7a8085}
+.segment{display:flex;border:1px solid #b8bdc1;background:#fff}
+.segment button{border:0;border-right:1px solid #d4d8da;background:#fff;padding:4px 8px;font-size:11px;color:#4e555b}
+.segment button:last-child{border-right:0}
+.segment button.active{background:var(--ink);color:#fff}
+
+.admin-head{max-width:980px;margin:0 auto;padding:18px 14px 10px}
+.admin-title{margin:0;font-size:24px;line-height:1.05;font-weight:700;letter-spacing:-.025em}
+.userline{margin-top:8px;display:flex;justify-content:flex-end;align-items:center;gap:8px;font-size:12px;color:#6d7378}
+.user-icon{font-size:13px;color:#555b60}
+.logout{border:1px solid #dc9c9c;background:#fff;color:#a72f2f;padding:4px 7px;font-size:11px}
+.logout:hover{background:#fff4f4;border-color:#c85f5f}
+
+.tabs{background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.tabs-inner{max-width:980px;margin:auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:0 8px}
+.tab{min-width:0;border:0;background:#fff;color:#5f666b;padding:9px 5px 8px;font-size:11px;font-weight:600;white-space:nowrap;border-bottom:2px solid transparent;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.tab.active{color:var(--ink);border-bottom-color:var(--blue)}
+
+main{max-width:980px;margin:auto;padding:16px 14px 46px}
+.section{display:none}.section.active{display:block}
+.section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:10px}
+.section-head h1{font-size:19px;line-height:1.1;margin:0;font-weight:700;letter-spacing:-.02em}
+.section-head p{font-size:12px;color:var(--muted);margin:4px 0 0;line-height:1.35;max-width:680px}
+.meta{font-size:11px;color:#70767b;white-space:nowrap;padding-top:2px}
+.actions{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.actions-left,.actions-right{display:flex;gap:5px;flex-wrap:wrap}
+.btn{border:1px solid #adb3b7;background:#fff;color:#30353a;padding:6px 9px;font-size:11px;font-weight:600;border-radius:0}
+.btn:hover{background:#f1f3f4}
+.btn-dark{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn-blue{background:var(--blue);border-color:var(--blue);color:var(--ink)}
+.btn-danger{color:#a92d2d;border-color:#d8a3a3}
+.status{display:flex;align-items:center;gap:10px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:6px 0;margin-bottom:9px;font-size:11px;color:#666d72;flex-wrap:wrap}
+.status strong{color:var(--ink)}
+.status .dotsep{width:2px;height:2px;background:#9aa0a4;border-radius:50%}
+
+.menu-list{display:flex;flex-direction:column;gap:4px}
+.menu-item{background:#fff;border:1px solid #c9ced1}
+.menu-row{min-height:36px;display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center}
+.drag{height:100%;border:0;border-right:1px solid #d9dddf;background:#f1f3f4;color:#777d81;font-size:13px;cursor:grab;padding:0}
+.item-main{min-width:0;padding:4px 8px}
+.item-main strong{font-size:12px;font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-main small{font-size:10px;color:#8a9095;display:block;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-actions{display:flex;height:36px}
+.item-actions button{border:0;border-left:1px solid #e0e3e5;background:#fff;padding:0 9px;font-size:10px;color:#565d62}
+.children{padding:4px 0 4px 18px;background:#f8f9f9;border-top:1px solid #e3e6e8}
+.children .menu-item{margin-bottom:4px}.children .menu-item:last-child{margin-bottom:0}
+.badge{display:inline-block;font-size:8px;font-weight:600;text-transform:uppercase;background:#e8ecee;color:#687078;padding:1px 4px;margin-left:4px}
+.badge.group{background:#d8eef8;color:#1c627e}.badge.ok{background:#dcefe9;color:#176147}.badge.scheduled{background:#fff0c7;color:#765400}.badge.off{background:#e6e8ea;color:#5d646a}
+.editor{display:none;border-top:1px solid #dde1e3;background:#fafbfb;padding:9px}.menu-item.open>.editor{display:block}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.field{display:flex;flex-direction:column;gap:3px}.field.full{grid-column:1/-1}
+label{font-size:10px;font-weight:600;color:#626970}
+input,select,textarea{width:100%;border:1px solid #b9bec2;background:#fff;border-radius:0;padding:6px 7px;font-size:11px;color:#25282d;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--blue)}
+textarea{min-height:84px;resize:vertical;line-height:1.35}
+.checkrow{display:flex;align-items:center;gap:6px;font-size:11px}.checkrow input{width:auto}
+
+.ann-card{background:#fff;border:1px solid #c9ced1;margin-bottom:5px}.ann-top{display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;min-height:40px}.ann-copy{padding:4px 8px;min-width:0}.ann-copy strong{display:block;font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ann-copy small{font-size:10px;color:#858c91}.ann-editor{border-top:1px solid #dde1e3;background:#fafbfb;padding:9px}.html-tools{display:flex;gap:3px;margin-bottom:5px}.html-tools button{border:1px solid #b8bec3;background:#fff;min-width:27px;height:24px;font-size:10px}
+.table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #d0d5d8;font-size:11px}.table th,.table td{padding:7px 8px;border-bottom:1px solid #e0e3e5;text-align:left}.table th{background:#f6f7f8;color:#6b7278;font-size:9px;text-transform:uppercase}.table tr:last-child td{border-bottom:0}
+.toast{position:fixed;right:14px;bottom:14px;background:var(--ink);color:#fff;border-left:3px solid var(--blue);padding:8px 10px;font-size:11px;opacity:0;transform:translateY(8px);pointer-events:none;transition:.15s ease;z-index:20}.toast.show{opacity:1;transform:translateY(0)}
+
 @media(max-width:700px){
-  .topbar{padding:0 12px;height:44px}.brand{font-size:12px}.userbar{gap:8px}.userbar span{display:none}
-  .preview{padding:8px 8px 9px}.preview-tools{margin-bottom:6px}.segment button{padding:4px 7px}.preview-frame.tablet,.preview-frame.mobile{width:100%}
-  .mock-nav span{padding:0 8px;font-size:9px}.mock-nav span:nth-child(3){display:none}
-  .tabs-inner{padding:0 4px}.tab{padding:9px 9px 8px}
-  main{padding:14px 10px 40px}.section-head{align-items:flex-start;flex-direction:column;gap:5px}.section-head h1{font-size:18px}.section-head p{font-size:10px}.meta{white-space:normal}
-  .actions{align-items:stretch}.actions-left,.actions-right{width:100%}.actions-right .btn{flex:1}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}
+  .mock-ann{font-size:11px;height:26px}
+  .mock-nav{height:32px}
+  .mock-nav span{padding:0 8px;font-size:10px}
+  .mock-nav span:nth-child(3){display:none}
+  .preview-tools-inner{padding:4px 8px}.preview-label{font-size:10px}.segment button{padding:4px 6px;font-size:10px}
+  .admin-head{padding:14px 10px 8px}.admin-title{font-size:20px}.userline{font-size:11px;margin-top:6px}
+  .tabs-inner{padding:0 2px}.tab{font-size:10px;padding:8px 2px 7px;letter-spacing:-.01em}
+  main{padding:13px 10px 38px}
+  .section-head{display:block;margin-bottom:9px}.section-head h1{font-size:17px}.section-head p{font-size:11px;line-height:1.32}.meta{margin-top:4px;white-space:normal;font-size:10px}
+  .actions{align-items:stretch}.actions-left,.actions-right{width:auto}.actions-right{margin-left:auto}
+  .status{font-size:10px;gap:7px}
+  .form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}
+  .table{font-size:10px}.table th,.table td{padding:6px 5px}
 }
 </style>
 </head>
 <body>
-<header class="topbar">
-  <div class="brand">METROBUS <span>| NAVHEAD</span><span class="dot">.</span></div>
-  <div class="userbar"><span>Přihlášen:</span><strong>Anlex</strong><button type="button">Odhlásit</button></div>
-</header>
 <section class="preview" id="preview">
-  <div class="preview-inner">
-    <div class="preview-tools">
-      <div class="preview-title">Live preview draftu</div>
-      <div class="segment">
-        <button class="active" data-preview="desktop">Desktop</button>
-        <button data-preview="tablet">Tablet</button>
-        <button data-preview="mobile">Mobil</button>
-        <button id="togglePreview">Skrýt</button>
-      </div>
-    </div>
-    <div class="preview-wrap">
-      <div class="preview-frame" id="previewFrame">
-        <div class="mock-ann" id="mockAnn">Na YouTube máme už 14 183 odběratelů!</div>
-        <div class="mock-nav" id="mockNav"></div>
-      </div>
-    </div>
+  <div class="preview-frame" id="previewFrame">
+    <div class="mock-ann" id="mockAnn">Na YouTube máme už 14 183 odběratelů!</div>
+    <div class="mock-nav" id="mockNav"></div>
   </div>
 </section>
-<nav class="tabs"><div class="tabs-inner">
-  <button class="tab active" data-tab="navigation">Navigace</button>
-  <button class="tab" data-tab="announcements">Announcementy</button>
-  <button class="tab" data-tab="history">Historie</button>
-  <button class="tab" data-tab="users">Uživatelé</button>
-</div></nav>
+<div class="preview-tools">
+  <div class="preview-tools-inner">
+    <div class="preview-label">Náhled draftu</div>
+    <div class="segment" aria-label="Šířka náhledu">
+      <button class="active" data-preview="desktop">Desktop</button>
+      <button data-preview="tablet">Tablet</button>
+      <button data-preview="mobile">Mobil</button>
+      <button id="togglePreview">Skrýt</button>
+    </div>
+  </div>
+</div>
+
+<header class="admin-head">
+  <h1 class="admin-title">Administrace navheadu</h1>
+  <div class="userline"><span class="user-icon" aria-hidden="true">●</span><span>Přihlášený uživatel: <strong>Anlex</strong></span><button class="logout" type="button">Odhlásit</button></div>
+</header>
+
+<nav class="tabs" aria-label="Administrace">
+  <div class="tabs-inner">
+    <button class="tab active" data-tab="navigation">Navigace</button>
+    <button class="tab" data-tab="announcements">Announcementy</button>
+    <button class="tab" data-tab="history">Historie</button>
+    <button class="tab" data-tab="users">Uživatelé</button>
+  </div>
+</nav>
+
 <main>
 <section class="section active" id="section-navigation">
-  <div class="section-head"><div><h1>Navigace</h1><p>Pořadí přetažením. Skupina je jen kontejner, maximálně dvě úrovně.</p></div><div class="meta">Draft revize 17 · uloženo 15:42</div></div>
+  <div class="section-head"><div><h1>Navigace</h1><p>Pořadí měníš přetažením. Skupina je pouze kontejner a sama není odkazem. Maximální hloubka jsou dvě úrovně.</p></div><div class="meta">Draft revize 17 · uloženo 15:42</div></div>
   <div class="actions">
     <div class="actions-left"><button class="btn" id="addLink">+ Odkaz</button><button class="btn" id="addGroup">+ Skupina</button></div>
     <div class="actions-right"><button class="btn btn-dark" data-save>Uložit</button><button class="btn btn-blue" data-publish>Publikovat</button></div>
@@ -110,12 +182,13 @@ main{max-width:1040px;margin:auto;padding:18px 16px 50px}.section{display:none}.
   </tbody></table>
 </section>
 </main>
+
 <div class="toast" id="toast">Uloženo.</div>
 <script>
 const menu=[
  {id:'m1',label:'Metrobus',type:'link',url:'https://metrobus.cz/',key:'metrobus'},
  {id:'m2',label:'Videa',type:'link',url:'https://metrobus.cz/',key:'videa'},
- {id:'m3',label:'Studio',type:'link',url:'https://metrobus.cz/studio',key:'studio'},
+ {id:'m3',label:'Studio',type:'link',url:'https://studio.metrobus.cz/',key:'studio'},
  {id:'m4',label:'Forendors',type:'link',url:'https://www.forendors.cz/metrobus',key:'forendors'},
  {id:'g1',label:'Aplikace',type:'group',key:'apps',children:[
    {id:'a1',label:'Dopravní výročí',type:'link',url:'#',key:'vyroci'},
@@ -129,11 +202,11 @@ const anns=[
 ];
 const menuList=document.querySelector('#menuList'),mockNav=document.querySelector('#mockNav'),annList=document.querySelector('#announcementList'),mockAnn=document.querySelector('#mockAnn');
 function showToast(t){const e=document.querySelector('#toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1500)}
-function menuItem(i,child=false){return `<div class="menu-item" draggable="${child?'false':'true'}" data-id="${i.id}"><div class="menu-row"><button class="drag">⋮⋮</button><div class="item-main"><strong>${i.label}${i.type==='group'?'<span class="badge group">skupina</span>':''}</strong><small>${i.type==='group'?'Kontejner':i.url}</small></div><div class="item-actions"><button data-edit>Upravit</button></div></div><div class="editor"><div class="form-grid"><div class="field"><label>Název</label><input value="${i.label}"></div><div class="field"><label>Key</label><input value="${i.key||''}"></div>${i.type==='link'?`<div class="field full"><label>URL</label><input value="${i.url||''}"></div><div class="field"><label>Otevřít</label><select><option>Stejná karta</option><option>Nová karta</option></select></div>`:''}<div class="field"><label>Stav</label><div class="checkrow"><input type="checkbox" checked> Aktivní</div></div><div class="field full"><button class="btn btn-danger">Smazat</button></div></div></div></div>`}
-function renderMenu(){menuList.innerHTML=menu.map(i=>{let h=menuItem(i);if(i.children)h=h.replace('</div></div>','</div></div>')+`<div class="children">${i.children.map(c=>menuItem(c,true)).join('')}</div>`;return `<div class="menu-wrap">${h}</div>`}).join('');bindEdit();renderPreview()}
+function menuItem(i,child=false){return `<div class="menu-item" draggable="${child?'false':'true'}" data-id="${i.id}"><div class="menu-row"><button class="drag" aria-label="Přesunout">☰</button><div class="item-main"><strong>${i.label}${i.type==='group'?'<span class="badge group">skupina</span>':''}</strong><small>${i.type==='group'?'Kontejner bez URL':i.url}</small></div><div class="item-actions"><button data-edit>Upravit</button></div></div><div class="editor"><div class="form-grid"><div class="field"><label>Název</label><input value="${i.label}"></div><div class="field"><label>Key</label><input value="${i.key||''}"></div>${i.type==='link'?`<div class="field full"><label>URL</label><input value="${i.url||''}"></div><div class="field"><label>Otevřít</label><select><option>Stejná karta</option><option>Nová karta</option></select></div>`:''}<div class="field"><label>Stav</label><div class="checkrow"><input type="checkbox" checked> Aktivní</div></div><div class="field full"><button class="btn btn-danger">Smazat</button></div></div></div></div>`}
+function renderMenu(){menuList.innerHTML=menu.map(i=>{let h=menuItem(i);if(i.children)h+=`<div class="children">${i.children.map(c=>menuItem(c,true)).join('')}</div>`;return `<div class="menu-wrap">${h}</div>`}).join('');bindEdit();renderPreview()}
 function bindEdit(){document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>b.closest('.menu-item').classList.toggle('open'))}
 function renderPreview(){mockNav.innerHTML=menu.filter(i=>i.type!=='group'||i.children?.length).map(i=>`<span class="${i.key==='apps'?'active':''}">${i.label}${i.type==='group'?' ▾':''}</span>`).join('')}
-function renderAnns(){annList.innerHTML=anns.map((a,n)=>`<div class="ann-card"><div class="ann-top"><button class="drag">⋮⋮</button><div class="ann-copy"><strong>${a.html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}</strong><small>${a.from?'od '+a.from:'bez začátku'} · ${a.to?'do '+a.to:'bez konce'}</small></div><span class="badge ${n?'scheduled':'ok'}">${n?'naplánováno':'aktivní'}</span></div><div class="ann-editor"><div class="html-tools"><button><b>B</b></button><button><i>I</i></button><button><u>U</u></button><button>↗</button><button>&lt;br&gt;</button></div><textarea>${a.html}</textarea><div class="form-grid" style="margin-top:8px"><div class="field"><label>Visible from</label><input value="${a.from}"></div><div class="field"><label>Visible to</label><input value="${a.to}"></div></div></div></div>`).join('');mockAnn.textContent='Na YouTube máme už 14 183 odběratelů!'}
+function renderAnns(){annList.innerHTML=anns.map((a,n)=>`<div class="ann-card"><div class="ann-top"><button class="drag" aria-label="Přesunout">☰</button><div class="ann-copy"><strong>${a.html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}</strong><small>${a.from?'od '+a.from:'bez začátku'} · ${a.to?'do '+a.to:'bez konce'}</small></div><span class="badge ${n?'scheduled':'ok'}">${n?'naplánováno':'aktivní'}</span></div><div class="ann-editor"><div class="html-tools"><button><b>B</b></button><button><i>I</i></button><button><u>U</u></button><button>↗</button><button>&lt;br&gt;</button></div><textarea>${a.html}</textarea><div class="form-grid" style="margin-top:7px"><div class="field"><label>Visible from</label><input value="${a.from}"></div><div class="field"><label>Visible to</label><input value="${a.to}"></div></div></div></div>`).join('');mockAnn.textContent='Na YouTube máme už 14 183 odběratelů!'}
 renderMenu();renderAnns();
 
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.querySelector('#section-'+t.dataset.tab).classList.add('active')});
