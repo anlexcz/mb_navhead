@@ -1,9 +1,10 @@
 const FALLBACK_CONFIG = {
   main: [
+    { id: 'metrobus', label: 'Metrobus', url: 'https://metrobus.cz/' },
     { id: 'videa', label: 'Videa', url: 'https://metrobus.cz/' },
-    { id: 'studio', label: 'Studio', url: '#' },
+    { id: 'studio', label: 'Studio', url: 'https://metrobus.cz/studio' },
+    { id: 'forendors', label: 'Forendors', url: 'https://www.forendors.cz/metrobus', priority: true },
     { id: 'apps', label: 'Aplikace', type: 'apps' },
-    { id: 'forendors', label: 'Forendors', url: '#', priority: true },
     { id: 'odkazy', label: 'Odkazy', url: 'https://metrobus.cz/odkazy' }
   ],
   apps: [
@@ -379,7 +380,7 @@ class MetrobusNav extends HTMLElement {
   }
 
   renderMobileInline() {
-    const ids = ['videa', 'studio', 'forendors', 'odkazy'];
+    const ids = ['metrobus', 'videa', 'studio', 'forendors', 'odkazy'];
     return ids
       .map(id => this.config.main.find(item => item.id === id))
       .filter(Boolean)
@@ -388,7 +389,7 @@ class MetrobusNav extends HTMLElement {
   }
 
   renderMorePanel() {
-    const ids = ['videa', 'studio', 'odkazy'];
+    const ids = ['metrobus', 'videa', 'studio', 'odkazy'];
     const mainById = Object.fromEntries(this.config.main.map(item => [item.id, item]));
     const overflowMain = ids
       .map(id => mainById[id])
@@ -420,7 +421,7 @@ class MetrobusNav extends HTMLElement {
     items.forEach(item => item.dataset.compactHidden = 'false');
 
     const available = nav.clientWidth - moreWrap.offsetWidth;
-    const hideOrder = ['odkazy', 'studio', 'videa'];
+    const hideOrder = ['odkazy', 'studio', 'metrobus', 'videa'];
     const hidden = new Set();
     const currentWidth = () => inline.scrollWidth;
 
