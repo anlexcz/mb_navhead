@@ -205,13 +205,14 @@ const styles = `
     display: none;
     position: absolute;
     top: 100%;
-    right: 8px;
-    width: min(320px, calc(100% - 16px));
+    left: 0;
+    right: 0;
+    width: 100%;
     background: var(--mb-nav-bg);
-    border: 1px solid var(--mb-nav-border);
-    border-top: 0;
-    box-shadow: 0 12px 28px rgba(0,0,0,.28);
-    padding: 5px;
+    border-top: 1px solid var(--mb-nav-border);
+    border-bottom: 3px solid var(--mb-nav-blue);
+    box-shadow: 0 12px 28px rgba(0,0,0,.24);
+    padding: 3px 6px 5px;
     z-index: 2;
   }
 
@@ -219,10 +220,10 @@ const styles = `
 
   .more-panel .item {
     width: 100%;
-    min-height: 34px;
-    padding: 0 10px;
+    min-height: 29px;
+    padding: 0 8px;
     justify-content: flex-start;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 500;
     letter-spacing: -0.025em;
   }
@@ -232,17 +233,17 @@ const styles = `
   }
 
   .more-section-title {
-    min-height: 27px;
-    padding: 7px 10px 3px;
+    min-height: 23px;
+    padding: 5px 8px 2px;
     display: flex;
     align-items: center;
     color: rgba(255,255,255,.52);
-    font-size: 10px;
+    font-size: 9.5px;
     font-weight: 700;
     letter-spacing: .04em;
     text-transform: uppercase;
     border-top: 1px solid var(--mb-nav-border);
-    margin-top: 3px;
+    margin-top: 2px;
   }
 
   @media (max-width: 720px) {
