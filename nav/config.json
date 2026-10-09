@@ -1,0 +1,14 @@
+{
+  "main": [
+    { "id": "videa", "label": "Videa", "url": "https://metrobus.cz/" },
+    { "id": "studio", "label": "Studio", "url": "https://metrobus.cz/studio" },
+    { "id": "apps", "label": "Aplikace", "type": "apps" },
+    { "id": "forendors", "label": "Forendors", "url": "https://www.forendors.cz/metrobus", "priority": true },
+    { "id": "odkazy", "label": "Odkazy", "url": "https://metrobus.cz/odkazy" }
+  ],
+  "apps": [
+    { "id": "vyroci", "label": "Dopravní výročí", "url": "#" },
+    { "id": "kalendar", "label": "Šotoušův kalendář", "url": "#" },
+    { "id": "sotofoto", "label": "Šotofoto", "url": "#" }
+  ]
+}
