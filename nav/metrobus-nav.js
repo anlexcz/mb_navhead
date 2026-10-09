@@ -148,30 +148,53 @@ const styles = `
     display: none;
     width: 100%;
     align-items: stretch;
-    justify-content: flex-end;
+    justify-content: center;
   }
 
-  .mobile-priority {
+  .mobile-inline {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .mobile-inline .item {
     min-height: calc(var(--mb-nav-height) - 3px);
-    padding: 0 16px;
+    padding: 0 12px;
+    font-size: 14px;
+  }
+
+  .mobile-inline .item[data-id='forendors'] {
+    font-weight: 700;
   }
 
   .menu-toggle {
-    width: 46px;
+    min-width: 46px;
     min-height: calc(var(--mb-nav-height) - 3px);
+    padding: 0 12px;
     border: 0;
     border-left: 1px solid var(--mb-nav-border);
     background: transparent;
     color: var(--mb-nav-text);
-    display: inline-grid;
-    place-items: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
     cursor: pointer;
+    white-space: nowrap;
   }
 
   .menu-toggle:hover,
   .menu-toggle:focus-visible {
     color: var(--mb-nav-blue);
     outline: none;
+  }
+
+  .menu-label {
+    display: none;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
   }
 
   .burger,
@@ -186,7 +209,7 @@ const styles = `
     transition: transform .14s ease, opacity .14s ease;
   }
 
-  .burger { position: relative; }
+  .burger { position: relative; flex: 0 0 auto; }
   .burger::before { position: absolute; top: -6px; }
   .burger::after { position: absolute; top: 6px; }
 
@@ -229,10 +252,52 @@ const styles = `
   }
 
   @media (max-width: 720px) {
-    :host { --mb-nav-height: 36px; }
+    :host { --mb-nav-height: 38px; }
     .inner { padding: 0; }
     .desktop-nav { display: none; }
     .mobile-nav { display: flex; }
+  }
+
+  /* Na běžném telefonu využijeme šířku naplno: tři hlavní cíle + menu. */
+  @media (min-width: 421px) and (max-width: 720px) {
+    .mobile-nav { justify-content: center; }
+    .mobile-inline .item { padding-inline: clamp(8px, 2.2vw, 16px); }
+  }
+
+  /* Na užším telefonu necháme obchodní cíl a zbytek pojmenujeme jako Metrobus menu. */
+  @media (max-width: 420px) {
+    .mobile-nav {
+      justify-content: flex-end;
+    }
+
+    .mobile-inline .item:not([data-id='forendors']) {
+      display: none;
+    }
+
+    .mobile-inline .item[data-id='forendors'] {
+      padding: 0 14px;
+    }
+
+    .menu-toggle {
+      padding: 0 13px;
+      min-width: auto;
+    }
+
+    .menu-label { display: inline; }
+  }
+
+  @media (max-width: 340px) {
+    .mobile-inline .item[data-id='forendors'] {
+      padding-inline: 10px;
+      font-size: 13px;
+    }
+
+    .menu-toggle {
+      padding-inline: 10px;
+      gap: 7px;
+    }
+
+    .menu-label { font-size: 12px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -316,8 +381,17 @@ class MetrobusNav extends HTMLElement {
     }).join('');
   }
 
+  renderMobileInline() {
+    const preferredIds = ['videa', 'studio', 'forendors'];
+    return preferredIds
+      .map(id => this.config.main.find(item => item.id === id))
+      .filter(Boolean)
+      .map(item => this.link(item))
+      .join('');
+  }
+
   renderMobilePanel() {
-    const regular = this.config.main.filter(item => !item.priority && item.type !== 'apps');
+    const regular = this.config.main.filter(item => item.type !== 'apps');
     return `
       ${regular.map(item => this.link(item)).join('')}
       <div class="mobile-section-title">Aplikace</div>
@@ -326,8 +400,6 @@ class MetrobusNav extends HTMLElement {
   }
 
   render() {
-    const priority = this.config.main.find(item => item.priority);
-
     this.shadowRoot.innerHTML = `
       <style>${styles}</style>
       <nav class="bar" aria-label="Metrobus – globální navigace">
@@ -337,8 +409,11 @@ class MetrobusNav extends HTMLElement {
           </div>
 
           <div class="mobile-nav">
-            ${priority ? this.link(priority, 'item mobile-priority') : ''}
-            <button class="menu-toggle" type="button" aria-label="Otevřít navigaci" aria-expanded="${this.mobileOpen}" data-action="mobile-menu">
+            <div class="mobile-inline">
+              ${this.renderMobileInline()}
+            </div>
+            <button class="menu-toggle" type="button" aria-label="Otevřít Metrobus menu" aria-expanded="${this.mobileOpen}" data-action="mobile-menu">
+              <span class="menu-label">Metrobus menu</span>
               <span class="burger" aria-hidden="true"></span>
             </button>
           </div>
