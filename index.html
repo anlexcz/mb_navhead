@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Metrobus universal nav – demo</title>
+  <style>
+    :root { font-family: Arial, sans-serif; color-scheme: light; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f3f4f6; color: #1f2328; }
+
+    .fake-site-header {
+      background: #fff;
+      border-bottom: 1px solid #d9dde3;
+      padding: 28px 24px;
+    }
+
+    .fake-site-header-inner,
+    main {
+      width: min(100% - 32px, 1100px);
+      margin: 0 auto;
+    }
+
+    .fake-site-header h1 {
+      margin: 0 0 8px;
+      font-size: clamp(26px, 4vw, 44px);
+    }
+
+    .fake-site-header p { margin: 0; color: #667085; }
+
+    main { padding: 32px 0 60px; }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e2e5e9;
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+
+    code { background: #eef1f4; border-radius: 4px; padding: 2px 5px; }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 8px 12px;
+      border: 1px solid #cfd4da;
+      background: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <metrobus-nav id="nav" active="sotofoto"></metrobus-nav>
+
+  <header class="fake-site-header">
+    <div class="fake-site-header-inner">
+      <h1>Šotofoto</h1>
+      <p>Tady začíná vlastní hlavička konkrétního webu. Metrobusí proužek nad ní je samostatná vrstva.</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Živé demo</h2>
+      <p>Aktivní položku lze měnit atributem <code>active</code>. Pokud je aktivní konkrétní aplikace, zvýrazní se na desktopu položka <strong>Aplikace</strong>.</p>
+      <div class="controls">
+        <button data-active="videa">Videa</button>
+        <button data-active="studio">Studio</button>
+        <button data-active="vyroci">Výročí</button>
+        <button data-active="kalendar">Kalendář</button>
+        <button data-active="sotofoto">Šotofoto</button>
+        <button data-active="forendors">Forendors</button>
+        <button data-active="odkazy">Odkazy</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Záměr</h2>
+      <p>Lišta je schválně malá a nenese název Metrobusu. Není to hlavička webu, pouze rychlý globální přepínač mezi hlavními částmi ekosystému Metrobusu.</p>
+    </section>
+  </main>
+
+  <script type="module" src="./nav/metrobus-nav.js?v=announcement-3"></script>
+  <script>
+    const nav = document.querySelector('#nav');
+    document.querySelectorAll('[data-active]').forEach(button => {
+      button.addEventListener('click', () => nav.setAttribute('active', button.dataset.active));
+    });
+  </script>
+</body>
+</html>

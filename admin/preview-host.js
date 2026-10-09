@@ -1,7 +1,6 @@
-// Admin preview host.
-// IMPORTANT: this file must never implement its own navhead renderer.
-// The live preview must mount the same production metrobus-nav component
-// used by published sites and feed it draft configuration only.
+// Admin preview host: never implement a second navhead renderer here.
+// Preview must mount the same production metrobus-nav component as published sites.
+// Only the configuration source differs: draft in admin, published data in production.
 // Accent: #87CEFA.
 
 export function applyDraftToProductionNav(navElement, draft) {
