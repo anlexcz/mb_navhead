@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "navigation": [
+    {"id":"nav_metrobus","key":"metrobus","type":"link","label":"Metrobus","url":"https://metrobus.cz/","target":"_self"},
+    {"id":"nav_videa","key":"videa","type":"link","label":"Videa","url":"https://metrobus.cz/","target":"_self"},
+    {"id":"nav_studio","key":"studio","type":"link","label":"Studio","url":"https://studio.metrobus.cz/","target":"_self"},
+    {"id":"nav_forendors","key":"forendors","type":"link","label":"Forendors","url":"https://www.forendors.cz/metrobus","target":"_self"},
+    {"id":"nav_apps","key":"apps","type":"group","label":"Aplikace","children":[
+      {"id":"nav_vyroci","key":"vyroci","type":"link","label":"Dopravní výročí","url":"#","target":"_self"},
+      {"id":"nav_kalendar","key":"kalendar","type":"link","label":"Šotoušův kalendář","url":"#","target":"_self"},
+      {"id":"nav_sotofoto","key":"sotofoto","type":"link","label":"Šotofoto","url":"#","target":"_self"}
+    ]},
+    {"id":"nav_odkazy","key":"odkazy","type":"link","label":"Odkazy","url":"https://metrobus.cz/odkazy","target":"_self"}
+  ],
+  "announcements": [
+    {"id":"ann_test","html":"Na YouTube máme už <strong>14 183 odběratelů!</strong><br>Všem vám moc děkujeme za podporu ❤️","visible_from":null,"visible_to":null,"enabled":true,"order":10}
+  ]
+}
