@@ -96,7 +96,7 @@ const styles = `
     color: var(--mb-nav-active-text);
   }
 
-  /* desktop */
+  /* Desktop */
   .desktop-nav {
     display: flex;
     align-items: stretch;
@@ -153,7 +153,7 @@ const styles = `
     justify-content: flex-start;
   }
 
-  /* mobile / compact */
+  /* Kompaktní navigace */
   .mobile-nav {
     display: none;
     width: 100%;
@@ -170,27 +170,31 @@ const styles = `
   }
 
   .mobile-inline .item {
-    padding: 0 10px;
+    padding: 0 9px;
     font-size: 13px;
-    font-weight: 600;
-    letter-spacing: -0.03em;
+    font-weight: 500;
+    letter-spacing: -0.035em;
   }
 
   .mobile-inline .item[data-id='forendors'] {
-    font-weight: 700;
+    font-weight: 600;
+  }
+
+  .mobile-inline .item[data-compact-hidden='true'] {
+    display: none;
   }
 
   .more-wrap {
-    position: relative;
     display: flex;
     border-left: 1px solid var(--mb-nav-border);
+    flex: 0 0 auto;
   }
 
   .more-toggle {
-    padding: 0 11px;
+    padding: 0 10px;
     font-size: 13px;
     font-weight: 600;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.035em;
   }
 
   .more-wrap.open .more-toggle {
@@ -201,83 +205,58 @@ const styles = `
     display: none;
     position: absolute;
     top: 100%;
-    right: 0;
-    width: min(280px, calc(100vw - 16px));
+    right: 8px;
+    width: min(320px, calc(100% - 16px));
     background: var(--mb-nav-bg);
     border: 1px solid var(--mb-nav-border);
     border-top: 0;
     box-shadow: 0 12px 28px rgba(0,0,0,.28);
-    padding: 6px;
+    padding: 5px;
+    z-index: 2;
   }
 
-  .more-wrap.open .more-panel { display: block; }
+  .bar.more-open .more-panel { display: block; }
 
   .more-panel .item {
     width: 100%;
-    min-height: 40px;
-    padding: 0 12px;
+    min-height: 34px;
+    padding: 0 10px;
     justify-content: flex-start;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+  }
+
+  .more-panel .item[data-overflow-visible='false'] {
+    display: none;
   }
 
   .more-section-title {
-    min-height: 32px;
-    padding: 8px 12px 4px;
+    min-height: 27px;
+    padding: 7px 10px 3px;
     display: flex;
     align-items: center;
     color: rgba(255,255,255,.52);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
-    letter-spacing: .035em;
+    letter-spacing: .04em;
     text-transform: uppercase;
     border-top: 1px solid var(--mb-nav-border);
-    margin-top: 4px;
+    margin-top: 3px;
   }
 
-  /* Každý řádek v panelu dostane datovou třídu, abychom mohli schovat položky,
-     které jsou na dané šířce už viditelné přímo v proužku. */
-  .more-item-videa,
-  .more-item-studio,
-  .more-item-forendors { display: none !important; }
-
   @media (max-width: 720px) {
-    :host { --mb-nav-height: 36px; }
-    .inner { padding: 0; }
+    :host { --mb-nav-height: 35px; }
+    .inner { padding: 0 4px; }
     .desktop-nav { display: none; }
     .mobile-nav { display: flex; }
   }
 
-  /* širší mobil: Videa + Studio + Forendors + Další */
-  @media (min-width: 560px) and (max-width: 720px) {
-    .mobile-inline .item { padding-inline: 11px; }
-  }
-
-  /* střední mobil: Videa + Forendors + Další */
-  @media (min-width: 430px) and (max-width: 559px) {
-    .mobile-inline .item[data-id='studio'] { display: none; }
-    .more-item-studio { display: flex !important; }
-  }
-
-  /* užší mobil: Forendors + Další */
-  @media (max-width: 429px) {
-    .mobile-inline .item[data-id='videa'],
-    .mobile-inline .item[data-id='studio'] { display: none; }
-
-    .more-item-videa,
-    .more-item-studio { display: flex !important; }
-
-    .mobile-inline .item[data-id='forendors'],
+  @media (max-width: 360px) {
+    .mobile-inline .item,
     .more-toggle {
-      padding-inline: 10px;
-    }
-  }
-
-  @media (max-width: 340px) {
-    .mobile-inline .item[data-id='forendors'],
-    .more-toggle {
-      padding-inline: 8px;
-      font-size: 12px;
+      padding-inline: 7px;
+      font-size: 12.5px;
     }
   }
 
@@ -295,16 +274,24 @@ class MetrobusNav extends HTMLElement {
     this.config = FALLBACK_CONFIG;
     this.moreOpen = false;
     this.appsOpen = false;
+    this.hiddenCompactIds = new Set();
+    this.resizeObserver = null;
   }
 
   connectedCallback() {
     this.render();
     this.loadConfig();
     document.addEventListener('click', this.handleOutsideClick);
+
+    this.resizeObserver = new ResizeObserver(() => this.scheduleCompactLayout());
+    this.resizeObserver.observe(this);
+
+    document.fonts?.ready.then(() => this.scheduleCompactLayout());
   }
 
   disconnectedCallback() {
     document.removeEventListener('click', this.handleOutsideClick);
+    this.resizeObserver?.disconnect();
   }
 
   attributeChangedCallback() {
@@ -341,9 +328,9 @@ class MetrobusNav extends HTMLElement {
     }
   }
 
-  link(item, className = 'item') {
+  link(item, className = 'item', extraAttributes = '') {
     const active = this.active === item.id ? ' active' : '';
-    return `<a class="${className}${active}" href="${item.url || '#'}" data-id="${item.id}">${item.label}</a>`;
+    return `<a class="${className}${active}" href="${item.url || '#'}" data-id="${item.id}" ${extraAttributes}>${item.label}</a>`;
   }
 
   renderDesktop() {
@@ -363,33 +350,71 @@ class MetrobusNav extends HTMLElement {
   }
 
   renderMobileInline() {
-    const ids = ['videa', 'studio', 'forendors'];
+    const ids = ['videa', 'studio', 'forendors', 'odkazy'];
     return ids
       .map(id => this.config.main.find(item => item.id === id))
       .filter(Boolean)
-      .map(item => this.link(item))
+      .map(item => this.link(item, 'item compact-item', `data-compact-id="${item.id}" data-compact-hidden="false"`))
       .join('');
   }
 
   renderMorePanel() {
+    const ids = ['videa', 'studio', 'odkazy'];
     const mainById = Object.fromEntries(this.config.main.map(item => [item.id, item]));
-    const extraMain = ['videa', 'studio', 'odkazy']
+    const overflowMain = ids
       .map(id => mainById[id])
       .filter(Boolean)
-      .map(item => this.link(item, `item more-item-${item.id}`))
+      .map(item => this.link(item, 'item', `data-overflow-id="${item.id}" data-overflow-visible="false"`))
       .join('');
 
     return `
-      ${extraMain}
+      ${overflowMain}
       <div class="more-section-title">Aplikace</div>
       ${this.config.apps.map(app => this.link(app)).join('')}
     `;
   }
 
+  scheduleCompactLayout() {
+    cancelAnimationFrame(this._layoutFrame);
+    this._layoutFrame = requestAnimationFrame(() => this.layoutCompactNav());
+  }
+
+  layoutCompactNav() {
+    const nav = this.shadowRoot.querySelector('.mobile-nav');
+    if (!nav || getComputedStyle(nav).display === 'none') return;
+
+    const inline = this.shadowRoot.querySelector('.mobile-inline');
+    const moreWrap = this.shadowRoot.querySelector('.more-wrap');
+    const items = [...this.shadowRoot.querySelectorAll('.compact-item')];
+    if (!inline || !moreWrap || !items.length) return;
+
+    items.forEach(item => item.dataset.compactHidden = 'false');
+
+    const available = nav.clientWidth - moreWrap.offsetWidth;
+    const hideOrder = ['odkazy', 'studio', 'videa'];
+    const hidden = new Set();
+
+    const currentWidth = () => inline.scrollWidth;
+
+    for (const id of hideOrder) {
+      if (currentWidth() <= available) break;
+      const item = items.find(candidate => candidate.dataset.compactId === id);
+      if (!item) continue;
+      item.dataset.compactHidden = 'true';
+      hidden.add(id);
+    }
+
+    this.hiddenCompactIds = hidden;
+
+    this.shadowRoot.querySelectorAll('[data-overflow-id]').forEach(item => {
+      item.dataset.overflowVisible = hidden.has(item.dataset.overflowId) ? 'true' : 'false';
+    });
+  }
+
   render() {
     this.shadowRoot.innerHTML = `
       <style>${styles}</style>
-      <nav class="bar" aria-label="Metrobus – globální navigace">
+      <nav class="bar${this.moreOpen ? ' more-open' : ''}" aria-label="Metrobus – globální navigace">
         <div class="inner">
           <div class="desktop-nav">
             ${this.renderDesktop()}
@@ -404,11 +429,12 @@ class MetrobusNav extends HTMLElement {
               <button class="more-toggle" type="button" aria-label="Zobrazit další odkazy Metrobusu" aria-expanded="${this.moreOpen}" data-action="more">
                 Další
               </button>
-              <div class="more-panel">
-                ${this.renderMorePanel()}
-              </div>
             </div>
           </div>
+        </div>
+
+        <div class="more-panel">
+          ${this.renderMorePanel()}
         </div>
       </nav>
     `;
@@ -422,6 +448,8 @@ class MetrobusNav extends HTMLElement {
       this.moreOpen = !this.moreOpen;
       this.render();
     });
+
+    this.scheduleCompactLayout();
   }
 }
 
