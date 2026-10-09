@@ -62,10 +62,13 @@ const styles = `
     align-items:center;
     justify-content:center;
     text-align:center;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:clip;
     font-size:12.5px;
     font-weight:600;
     letter-spacing:-.025em;
-    line-height:1.15;
+    line-height:1;
     opacity:0;
     transform:translateY(72%) scale(.94);
     filter:blur(.2px);
@@ -243,19 +246,31 @@ class MetrobusNav extends HTMLElement {
     if(!clean)return [];
     if(this.clientWidth>720)return [clean];
 
+    const maxChars=Math.max(24,Math.floor((this.clientWidth-24)/6.4));
     const sentences=clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map(s=>s.trim()).filter(Boolean)||[clean];
-    if(sentences.length>1)return sentences;
+    const frames=[];
 
-    if(clean.length<=54)return [clean];
-    const words=clean.split(/\s+/);
-    const target=Math.ceil(clean.length/2);
-    let first='';
-    let second='';
-    for(const word of words){
-      if(!second && (first.length===0 || (first+' '+word).length<=target)) first+=(first?' ':'')+word;
-      else second+=(second?' ':'')+word;
+    for(const sentence of sentences){
+      if(sentence.length<=maxChars){
+        frames.push(sentence);
+        continue;
+      }
+
+      const words=sentence.split(/\s+/);
+      let line='';
+      for(const word of words){
+        const candidate=line?`${line} ${word}`:word;
+        if(candidate.length<=maxChars||!line){
+          line=candidate;
+        }else{
+          frames.push(line);
+          line=word;
+        }
+      }
+      if(line)frames.push(line);
     }
-    return second?[first,second]:[clean];
+
+    return frames;
   }
 
   getAnnouncementFrames(){
