@@ -14,7 +14,7 @@ const FALLBACK_CONFIG = {
 };
 
 const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap');
 
   :host {
     --mb-nav-bg: #25282d;
@@ -34,8 +34,8 @@ const styles = `
 
   .bar {
     position: relative;
-    background: var(--mb-nav-bg);
     min-height: var(--mb-nav-height);
+    background: var(--mb-nav-bg);
     border-bottom: 3px solid var(--mb-nav-blue);
     color: var(--mb-nav-text);
   }
@@ -50,42 +50,35 @@ const styles = `
     justify-content: center;
   }
 
-  .desktop-nav {
-    display: flex;
-    align-items: stretch;
-    justify-content: center;
-    gap: 2px;
-    width: 100%;
-  }
-
-  a,
-  button {
+  a, button {
     font: inherit;
     font-weight: 700;
     letter-spacing: -0.025em;
   }
 
   .item,
-  .apps-trigger {
+  .apps-trigger,
+  .more-toggle {
     appearance: none;
     border: 0;
     background: transparent;
     color: var(--mb-nav-text);
     min-height: calc(var(--mb-nav-height) - 3px);
-    padding: 0 20px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     text-decoration: none;
     cursor: pointer;
-    transition: color .14s ease, background-color .14s ease;
     white-space: nowrap;
+    transition: color .14s ease, background-color .14s ease;
   }
 
   .item:hover,
   .item:focus-visible,
   .apps-trigger:hover,
-  .apps-trigger:focus-visible {
+  .apps-trigger:focus-visible,
+  .more-toggle:hover,
+  .more-toggle:focus-visible {
     color: var(--mb-nav-blue);
     outline: none;
   }
@@ -103,19 +96,35 @@ const styles = `
     color: var(--mb-nav-active-text);
   }
 
+  /* desktop */
+  .desktop-nav {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 2px;
+    width: 100%;
+  }
+
+  .desktop-nav .item,
+  .desktop-nav .apps-trigger {
+    padding: 0 20px;
+  }
+
   .apps-wrap {
     position: relative;
     display: flex;
   }
 
-  .apps-trigger::after {
+  .apps-trigger::after,
+  .more-toggle::after {
     content: '';
-    width: 7px;
-    height: 7px;
-    border-right: 2px solid currentColor;
-    border-bottom: 2px solid currentColor;
-    transform: rotate(45deg) translateY(-2px);
-    margin-left: 8px;
+    width: 6px;
+    height: 6px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg) translateY(-1px);
+    margin-left: 7px;
+    flex: 0 0 auto;
   }
 
   .dropdown {
@@ -144,160 +153,132 @@ const styles = `
     justify-content: flex-start;
   }
 
+  /* mobile / compact */
   .mobile-nav {
     display: none;
     width: 100%;
+    min-width: 0;
     align-items: stretch;
     justify-content: center;
   }
 
   .mobile-inline {
     display: flex;
+    min-width: 0;
     align-items: stretch;
     justify-content: center;
-    min-width: 0;
   }
 
   .mobile-inline .item {
-    min-height: calc(var(--mb-nav-height) - 3px);
-    padding: 0 12px;
-    font-size: 14px;
+    padding: 0 10px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
   }
 
   .mobile-inline .item[data-id='forendors'] {
     font-weight: 700;
   }
 
-  .menu-toggle {
-    min-width: 46px;
-    min-height: calc(var(--mb-nav-height) - 3px);
-    padding: 0 12px;
-    border: 0;
+  .more-wrap {
+    position: relative;
+    display: flex;
     border-left: 1px solid var(--mb-nav-border);
-    background: transparent;
-    color: var(--mb-nav-text);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-    cursor: pointer;
-    white-space: nowrap;
   }
 
-  .menu-toggle:hover,
-  .menu-toggle:focus-visible {
-    color: var(--mb-nav-blue);
-    outline: none;
-  }
-
-  .menu-label {
-    display: none;
+  .more-toggle {
+    padding: 0 11px;
     font-size: 13px;
-    font-weight: 700;
-    letter-spacing: -0.025em;
+    font-weight: 600;
+    letter-spacing: -0.03em;
   }
 
-  .burger,
-  .burger::before,
-  .burger::after {
-    width: 18px;
-    height: 2px;
-    border-radius: 2px;
-    background: currentColor;
-    display: block;
-    content: '';
-    transition: transform .14s ease, opacity .14s ease;
+  .more-wrap.open .more-toggle {
+    color: var(--mb-nav-blue);
   }
 
-  .burger { position: relative; flex: 0 0 auto; }
-  .burger::before { position: absolute; top: -6px; }
-  .burger::after { position: absolute; top: 6px; }
-
-  .menu-toggle[aria-expanded='true'] .burger { background: transparent; }
-  .menu-toggle[aria-expanded='true'] .burger::before { transform: translateY(6px) rotate(45deg); }
-  .menu-toggle[aria-expanded='true'] .burger::after { transform: translateY(-6px) rotate(-45deg); }
-
-  .mobile-panel {
+  .more-panel {
     display: none;
     position: absolute;
     top: 100%;
-    left: 0;
     right: 0;
+    width: min(280px, calc(100vw - 16px));
     background: var(--mb-nav-bg);
-    border-bottom: 3px solid var(--mb-nav-blue);
+    border: 1px solid var(--mb-nav-border);
+    border-top: 0;
     box-shadow: 0 12px 28px rgba(0,0,0,.28);
-    padding: 6px 12px 10px;
+    padding: 6px;
   }
 
-  .mobile-panel.open { display: block; }
+  .more-wrap.open .more-panel { display: block; }
 
-  .mobile-panel .item,
-  .mobile-section-title {
+  .more-panel .item {
     width: 100%;
-    min-height: 42px;
-    justify-content: flex-start;
+    min-height: 40px;
     padding: 0 12px;
+    justify-content: flex-start;
+    font-size: 13px;
+    font-weight: 600;
   }
 
-  .mobile-section-title {
+  .more-section-title {
+    min-height: 32px;
+    padding: 8px 12px 4px;
     display: flex;
     align-items: center;
-    color: rgba(255,255,255,.58);
-    font-size: 12px;
+    color: rgba(255,255,255,.52);
+    font-size: 11px;
     font-weight: 700;
-    letter-spacing: .04em;
+    letter-spacing: .035em;
     text-transform: uppercase;
     border-top: 1px solid var(--mb-nav-border);
     margin-top: 4px;
   }
 
+  /* Každý řádek v panelu dostane datovou třídu, abychom mohli schovat položky,
+     které jsou na dané šířce už viditelné přímo v proužku. */
+  .more-item-videa,
+  .more-item-studio,
+  .more-item-forendors { display: none !important; }
+
   @media (max-width: 720px) {
-    :host { --mb-nav-height: 38px; }
+    :host { --mb-nav-height: 36px; }
     .inner { padding: 0; }
     .desktop-nav { display: none; }
     .mobile-nav { display: flex; }
   }
 
-  /* Na běžném telefonu využijeme šířku naplno: tři hlavní cíle + menu. */
-  @media (min-width: 421px) and (max-width: 720px) {
-    .mobile-nav { justify-content: center; }
-    .mobile-inline .item { padding-inline: clamp(8px, 2.2vw, 16px); }
+  /* širší mobil: Videa + Studio + Forendors + Další */
+  @media (min-width: 560px) and (max-width: 720px) {
+    .mobile-inline .item { padding-inline: 11px; }
   }
 
-  /* Na užším telefonu necháme obchodní cíl a zbytek pojmenujeme jako Metrobus menu. */
-  @media (max-width: 420px) {
-    .mobile-nav {
-      justify-content: flex-end;
-    }
+  /* střední mobil: Videa + Forendors + Další */
+  @media (min-width: 430px) and (max-width: 559px) {
+    .mobile-inline .item[data-id='studio'] { display: none; }
+    .more-item-studio { display: flex !important; }
+  }
 
-    .mobile-inline .item:not([data-id='forendors']) {
-      display: none;
-    }
+  /* užší mobil: Forendors + Další */
+  @media (max-width: 429px) {
+    .mobile-inline .item[data-id='videa'],
+    .mobile-inline .item[data-id='studio'] { display: none; }
 
-    .mobile-inline .item[data-id='forendors'] {
-      padding: 0 14px;
-    }
+    .more-item-videa,
+    .more-item-studio { display: flex !important; }
 
-    .menu-toggle {
-      padding: 0 13px;
-      min-width: auto;
+    .mobile-inline .item[data-id='forendors'],
+    .more-toggle {
+      padding-inline: 10px;
     }
-
-    .menu-label { display: inline; }
   }
 
   @media (max-width: 340px) {
-    .mobile-inline .item[data-id='forendors'] {
-      padding-inline: 10px;
-      font-size: 13px;
+    .mobile-inline .item[data-id='forendors'],
+    .more-toggle {
+      padding-inline: 8px;
+      font-size: 12px;
     }
-
-    .menu-toggle {
-      padding-inline: 10px;
-      gap: 7px;
-    }
-
-    .menu-label { font-size: 12px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -312,7 +293,7 @@ class MetrobusNav extends HTMLElement {
     super();
     this.attachShadow({ mode: 'open' });
     this.config = FALLBACK_CONFIG;
-    this.mobileOpen = false;
+    this.moreOpen = false;
     this.appsOpen = false;
   }
 
@@ -332,7 +313,7 @@ class MetrobusNav extends HTMLElement {
 
   handleOutsideClick = (event) => {
     if (!event.composedPath().includes(this)) {
-      this.mobileOpen = false;
+      this.moreOpen = false;
       this.appsOpen = false;
       this.render();
     }
@@ -382,19 +363,25 @@ class MetrobusNav extends HTMLElement {
   }
 
   renderMobileInline() {
-    const preferredIds = ['videa', 'studio', 'forendors'];
-    return preferredIds
+    const ids = ['videa', 'studio', 'forendors'];
+    return ids
       .map(id => this.config.main.find(item => item.id === id))
       .filter(Boolean)
       .map(item => this.link(item))
       .join('');
   }
 
-  renderMobilePanel() {
-    const regular = this.config.main.filter(item => item.type !== 'apps');
+  renderMorePanel() {
+    const mainById = Object.fromEntries(this.config.main.map(item => [item.id, item]));
+    const extraMain = ['videa', 'studio', 'odkazy']
+      .map(id => mainById[id])
+      .filter(Boolean)
+      .map(item => this.link(item, `item more-item-${item.id}`))
+      .join('');
+
     return `
-      ${regular.map(item => this.link(item)).join('')}
-      <div class="mobile-section-title">Aplikace</div>
+      ${extraMain}
+      <div class="more-section-title">Aplikace</div>
       ${this.config.apps.map(app => this.link(app)).join('')}
     `;
   }
@@ -412,15 +399,16 @@ class MetrobusNav extends HTMLElement {
             <div class="mobile-inline">
               ${this.renderMobileInline()}
             </div>
-            <button class="menu-toggle" type="button" aria-label="Otevřít Metrobus menu" aria-expanded="${this.mobileOpen}" data-action="mobile-menu">
-              <span class="menu-label">Metrobus menu</span>
-              <span class="burger" aria-hidden="true"></span>
-            </button>
-          </div>
-        </div>
 
-        <div class="mobile-panel${this.mobileOpen ? ' open' : ''}">
-          ${this.renderMobilePanel()}
+            <div class="more-wrap${this.moreOpen ? ' open' : ''}">
+              <button class="more-toggle" type="button" aria-label="Zobrazit další odkazy Metrobusu" aria-expanded="${this.moreOpen}" data-action="more">
+                Další
+              </button>
+              <div class="more-panel">
+                ${this.renderMorePanel()}
+              </div>
+            </div>
+          </div>
         </div>
       </nav>
     `;
@@ -430,8 +418,8 @@ class MetrobusNav extends HTMLElement {
       this.render();
     });
 
-    this.shadowRoot.querySelector('[data-action="mobile-menu"]')?.addEventListener('click', () => {
-      this.mobileOpen = !this.mobileOpen;
+    this.shadowRoot.querySelector('[data-action="more"]')?.addEventListener('click', () => {
+      this.moreOpen = !this.moreOpen;
       this.render();
     });
   }
