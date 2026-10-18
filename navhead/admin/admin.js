@@ -186,7 +186,47 @@ $('#menu').addEventListener('dragend', finishDrag);
 $('#addLink').onclick = () => { const item = newLink(); draft.navigation.push(item); changed(); renderMenu(item.key); };
 $('#addGroup').onclick = () => { const item = {key: uid('group'), type:'group', label:'Nová skupina', enabled:true, children:[]}; draft.navigation.push(item); changed(); renderMenu(item.key); };
 function announcementEntry(item, index) {
-  return `<details class="entry" data-ann="${index}"><summary class="entry-summary"><span class="entry-copy"><span class="entry-title" data-ann-title>${esc(plain(item.html) || 'Nové oznámení')}</span><span class="entry-url" data-ann-status>${item.enabled === false ? 'Vypnuté' : 'Aktivní'}</span></span><span class="entry-cue" aria-hidden="true"></span></summary><div class="entry-body"><div class="formatbar"><button class="button" type="button" data-format="strong" aria-label="Tučné písmo"><strong>B</strong></button><button class="button" type="button" data-format="em" aria-label="Kurzíva"><em>I</em></button><button class="button" type="button" data-format="link">Odkaz</button><button class="button" type="button" data-format="br">Nový úsek</button><label class="url-label" for="link_${index}">Adresa</label><input id="link_${index}" type="url" data-link-url placeholder="https://" aria-label="Adresa odkazu pro vložení do oznámení"></div><label class="field"><span class="sr-only">Text oznámení</span><textarea data-ann-field="html" aria-label="Text oznámení">${esc(item.html)}</textarea></label><div class="editor-options"><label class="check"><input type="checkbox" data-ann-field="enabled"${checked(item.enabled !== false)}>Zobrazovat</label></div><div class="editor-footer"><button cla…1122 tokens truncated…e=await serverRequest('publish');dirty=false;$('#draftStatus').textContent='Publikováno';toast('Publikováno.');}
+  return `<details class="entry" data-ann="${index}"><summary class="entry-summary"><span class="entry-copy"><span class="entry-title" data-ann-title>${esc(plain(item.html) || 'Nové oznámení')}</span><span class="entry-url" data-ann-status>${item.enabled === false ? 'Vypnuté' : 'Aktivní'}</span></span><span class="entry-cue" aria-hidden="true"></span></summary><div class="entry-body"><div class="formatbar"><button class="button" type="button" data-format="strong" aria-label="Tučné písmo"><strong>B</strong></button><button class="button" type="button" data-format="em" aria-label="Kurzíva"><em>I</em></button><button class="button" type="button" data-format="link">Odkaz</button><button class="button" type="button" data-format="br">Nový úsek</button><label class="url-label" for="link_${index}">Adresa</label><input id="link_${index}" type="url" data-link-url placeholder="https://" aria-label="Adresa odkazu pro vložení do oznámení"></div><label class="field"><span class="sr-only">Text oznámení</span><textarea data-ann-field="html" aria-label="Text oznámení">${esc(item.html)}</textarea></label><div class="editor-options"><label class="check"><input type="checkbox" data-ann-field="enabled"${checked(item.enabled !== false)}>Zobrazovat</label></div><div class="editor-footer"><button class="button quiet" type="button" data-ann-close>Zavřít</button><button class="button danger" type="button" data-ann-delete>Smazat</button></div></div></details>`;
+}
+function renderAnnouncements(openIndex) { $('#announcementsList').innerHTML = draft.announcements.map(announcementEntry).join('') || '<div class="empty">Žádná oznámení.</div>'; if (openIndex != null) { const entry = $('#announcementsList').querySelector(`[data-ann="${openIndex}"]`); entry.open = true; entry.querySelector('textarea').focus(); } }
+function updateAnnouncement(entry) { const item = draft.announcements[Number(entry.dataset.ann)]; item.html = entry.querySelector('textarea').value; item.enabled = entry.querySelector('[data-ann-field="enabled"]').checked; entry.querySelector('[data-ann-title]').textContent = plain(item.html) || 'Nové oznámení'; entry.querySelector('[data-ann-status]').textContent = item.enabled ? 'Aktivní' : 'Vypnuté'; changed(); }
+$('#announcementsList').addEventListener('input', event => { if (event.target.hasAttribute('data-ann-field')) updateAnnouncement(event.target.closest('[data-ann]')); });
+$('#announcementsList').addEventListener('click', event => {
+  const button = event.target.closest('button'); if (!button) return; const entry = button.closest('[data-ann]');
+  if (button.hasAttribute('data-ann-close')) { entry.open = false; entry.querySelector('summary').focus(); return; }
+  if (button.hasAttribute('data-ann-delete')) { draft.announcements.splice(Number(entry.dataset.ann), 1); changed(); renderAnnouncements(); return; }
+  if (!button.dataset.format) return;
+  const textarea = entry.querySelector('textarea'), kind = button.dataset.format, selected = textarea.value.slice(textarea.selectionStart, textarea.selectionEnd);
+  let insert;
+  if (kind === 'br') insert = '<br>';
+  else if (kind === 'link') { const url = entry.querySelector('[data-link-url]').value.trim(); if (!/^https?:\/\//i.test(url)) { toast('Vyplň adresu odkazu začínající https:// nebo http://.'); entry.querySelector('[data-link-url]').focus(); return; } insert = `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${selected || 'text odkazu'}</a>`; }
+  else insert = `<${kind}>${selected || 'text'}</${kind}>`;
+  textarea.setRangeText(insert, textarea.selectionStart, textarea.selectionEnd, 'end'); textarea.focus(); updateAnnouncement(entry);
+});
+$('#addAnnouncement').onclick = () => { draft.announcements.push({id: uid('ann'), html: '', enabled: true}); changed(); renderAnnouncements(draft.announcements.length - 1); };
+document.querySelectorAll('[data-tab]').forEach(button => button.onclick = () => { document.querySelectorAll('[data-tab]').forEach(tab => tab.removeAttribute('aria-current')); button.setAttribute('aria-current', 'page'); document.querySelectorAll('.tab-panel').forEach(panel => panel.hidden = panel.id !== button.dataset.tab); });
+const phone = matchMedia('(max-width:700px)'), preview = $('#preview');
+function showPreview(show) { preview.hidden = !show; $('#togglePreview').textContent = show ? 'Skrýt' : 'Zobrazit'; $('#togglePreview').setAttribute('aria-expanded', String(show)); }
+showPreview(!phone.matches);
+$('#togglePreview').onclick = () => showPreview(preview.hidden);
+document.querySelectorAll('[data-size]').forEach(button => button.onclick = () => { if (phone.matches) return; document.querySelectorAll('[data-size]').forEach(item => item.setAttribute('aria-pressed', String(item === button))); preview.className = `preview-stage ${button.dataset.size}`; });
+function validConfig(config) { return config && Array.isArray(config.navigation) && Array.isArray(config.announcements); }
+async function save() {
+  for (const input of $('#menu').querySelectorAll('[data-key-input]')) {
+    if (!applyKey(input)) {
+      toggleEditor(input.closest('[data-key]'), true);
+      input.reportValidity(); input.focus(); return false;
+    }
+  }
+  try {
+    serverState=await serverRequest('save',draft);draft=serverState.config;updatePreview();
+    dirty=false;$('#draftStatus').textContent='Uloženo';toast('Draft uložen.');return true;
+  } catch(error) {toast(error.message);return false;}
+}
+$('#saveDraft').onclick = save;
+if ($('#publishConfig')) $('#publishConfig').onclick = async () => {
+  const button=$('#publishConfig');button.disabled=true;
+  try {if (!await save()) return;serverState=await serverRequest('publish');dirty=false;$('#draftStatus').textContent='Publikováno';toast('Publikováno.');}
   catch(error) {toast(error.message);}
   finally {button.disabled=false;}
 };
