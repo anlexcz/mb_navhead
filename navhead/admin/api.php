@@ -1,7 +1,16 @@
 <?php
 declare(strict_types=1);
 require __DIR__.'/bootstrap.php';
-nh_session(); nh_auth(); header('Content-Type: application/json; charset=utf-8');
+nh_session(); header('Content-Type: application/json; charset=utf-8');
+if (isset($_GET['session'])) {
+    nh_auth(true,false);
+    if ($_SERVER['REQUEST_METHOD']==='POST') {
+        if (!hash_equals($_SESSION['csrf'],$_SERVER['HTTP_X_NAVHEAD_CSRF'] ?? '')) nh_fail(403,'Obnov stránku a zkus to znovu.');
+        $_SESSION['last_activity']=time();
+    } elseif ($_SERVER['REQUEST_METHOD']!=='GET') nh_fail(405,'Nepovolená metoda.');
+    echo nh_json(['expires_in'=>nh_expires_in()]); exit;
+}
+nh_auth(true);
 if ($_SERVER['REQUEST_METHOD']==='GET') { echo nh_json(nh_state()); exit; }
 if ($_SERVER['REQUEST_METHOD']!=='POST') nh_fail(405,'Nepovolená metoda.');
 if (!hash_equals($_SESSION['csrf'],$_SERVER['HTTP_X_NAVHEAD_CSRF'] ?? '')) nh_fail(403,'Obnov stránku a zkus to znovu.');

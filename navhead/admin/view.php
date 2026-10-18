@@ -6,9 +6,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Navigační lišta Metrobusu</title>
 <link rel="stylesheet" href="../fonts/montserrat.css">
-<link rel="stylesheet" href="./admin.css?v=7b6c82fcf65c">
-<script type="module" src="./admin.js?v=693c7849ea5a"></script>
+<link rel="stylesheet" href="./admin.css?v=63a8c8cc670e">
+<script type="module" src="./admin.js?v=3f107bc21ab1"></script>
 <meta name="navhead-api" content="./api.php">
+<meta name="navhead-login" content="./login.php">
 </head>
 <body>
 <section class="preview-shell" aria-label="Živý náhled">
@@ -17,7 +18,7 @@
 </section>
 <header class="page-head"><h1>Navigační lišta Metrobusu</h1><div class="head-actions"><div><button class="button" id="saveDraft" type="button">Uložit draft</button><button class="button" id="exportConfig" type="button">Stáhnout zálohu</button><button class="button primary" id="publishConfig" type="button">Publikovat</button></div></div></header>
 <div class="workspace">
-  <div class="workspace-bar"><nav class="tabs" aria-label="Sekce administrace"><button type="button" data-tab="navigation" aria-current="page">Navigace</button><button type="button" data-tab="announcements">Oznámení</button></nav><span id="draftStatus" role="status">Načítání…</span></div>
+  <div class="workspace-bar"><nav class="tabs" aria-label="Sekce administrace"><button type="button" data-tab="navigation" aria-current="page">Navigace</button><button type="button" data-tab="announcements">Oznámení</button></nav><div class="session-tools"><span id="draftStatus" role="status">Načítání…</span><button class="session-logout" type="button" id="logout" disabled>Odhlásit</button></div></div>
   <main>
     <section id="navigation" class="tab-panel" aria-label="Navigace"><div class="section-actions"><button type="button" class="button" id="addLink">+ Odkaz</button><button type="button" class="button" id="addGroup">+ Skupina</button></div><div id="menu" class="nav-tree"></div></section>
     <section id="announcements" class="tab-panel" aria-label="Oznámení" hidden><div class="section-actions"><button type="button" class="button" id="addAnnouncement">+ Oznámení</button></div><div id="announcementsList" class="list"></div></section>

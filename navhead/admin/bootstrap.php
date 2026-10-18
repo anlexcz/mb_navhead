@@ -3,6 +3,7 @@ declare(strict_types=1);
 ini_set('display_errors','0');
 define('NH_ROOT', dirname(__DIR__));
 define('NH_PRIVATE', NH_ROOT . '/private');
+const NH_IDLE_TIMEOUT = 1800;
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
 function nh_fail(int $status, string $message): void { http_response_code($status); header('Content-Type: application/json; charset=utf-8'); echo json_encode(['error'=>$message], JSON_UNESCAPED_UNICODE); exit; }
@@ -13,16 +14,28 @@ function nh_session(): void {
     if (!$secure && !in_array($host,['localhost','127.0.0.1','::1'],true)) nh_fail(400,'Administraci otevři přes HTTPS.');
     session_name('navhead_'.substr(hash('sha256',NH_ROOT),0,12));
     session_set_cookie_params(['lifetime'=>0,'path'=>rtrim(dirname($_SERVER['SCRIPT_NAME']),'/').'/','secure'=>$secure,'httponly'=>true,'samesite'=>'Strict']);
+    ini_set('session.gc_maxlifetime',(string)NH_IDLE_TIMEOUT);
     ini_set('session.use_strict_mode','1'); if (!@session_start()) nh_fail(503,'Hosting nemá funkční PHP sessions. Zkontroluj nastavení hostingu.');
     $_SESSION['csrf'] ??= bin2hex(random_bytes(32));
 }
-function nh_auth(): void {
-    $settings=nh_settings(); if (empty($settings['password_hash'])) { http_response_code(503); echo 'Nejdřív otevři admin/setup.php.'; exit; }
-    $user=$_SERVER['PHP_AUTH_USER'] ?? ''; $password=$_SERVER['PHP_AUTH_PW'] ?? '';
-    $authorization=$_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
-    if (!$user && strncmp($authorization,'Basic ',6)===0) { $decoded=base64_decode(substr($authorization,6),true); if ($decoded!==false) { $parts=explode(':',$decoded,2); $user=$parts[0]; $password=$parts[1] ?? ''; } }
-    if ($user!=='admin' || !password_verify($password,$settings['password_hash'])) { header('WWW-Authenticate: Basic realm="Metrobus admin", charset="UTF-8"'); nh_fail(401,'Přihlášení: admin a nastavené heslo.'); }
+function nh_escape(string $text): string { return htmlspecialchars($text,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8'); }
+function nh_authenticated(bool $touch=true): bool {
+    if (($_SESSION['auth_user'] ?? '')!=='admin') return false;
+    $stamp=hash('sha256',nh_settings()['password_hash'] ?? '');
+    if (time()-(int)($_SESSION['last_activity'] ?? 0)>=NH_IDLE_TIMEOUT || !hash_equals($stamp,$_SESSION['password_stamp'] ?? '')) {
+        $_SESSION=[]; session_regenerate_id(true); $_SESSION['csrf']=bin2hex(random_bytes(32)); return false;
+    }
+    if ($touch) $_SESSION['last_activity']=time();
+    return true;
 }
+function nh_auth(bool $api=false,bool $touch=true): void {
+    if (empty(nh_settings()['password_hash'])) nh_fail(503,'Nejdřív otevři admin/setup.php.');
+    if (nh_authenticated($touch)) return;
+    if ($api) nh_fail(401,'Přihlášení vypršelo. Přihlas se znovu.');
+    header('Location: ./login.php',true,303); exit;
+}
+function nh_expires_in(): int { return max(0,NH_IDLE_TIMEOUT-(time()-(int)($_SESSION['last_activity'] ?? 0))); }
+
 function nh_lock() { $handle=fopen(NH_PRIVATE.'/write-lock.php','c+'); if (!$handle || !flock($handle,LOCK_EX)) nh_fail(500,'Nelze uzamknout úložiště.'); return $handle; }
 function nh_atomic(string $file,string $contents): void {
     $tmp=tempnam(dirname($file),'.navhead-'); if ($tmp===false) throw new RuntimeException('Nelze vytvořit dočasný soubor.');
@@ -32,7 +45,7 @@ function nh_atomic(string $file,string $contents): void {
 }
 function nh_json(array $data): string { return json_encode($data,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT|JSON_THROW_ON_ERROR)."\n"; }
 function nh_read_draft(): string { $file=NH_PRIVATE.'/draft.php'; return is_file($file) ? substr((string)file_get_contents($file),strlen("<?php exit; ?>\n")) : (string)file_get_contents(NH_ROOT.'/config.json'); }
-function nh_state(): array { $draft=nh_read_draft(); $published=(string)file_get_contents(NH_ROOT.'/config.json'); return ['config'=>json_decode($draft,true,512,JSON_THROW_ON_ERROR),'draft_version'=>hash('sha256',$draft),'published_version'=>hash('sha256',$published),'csrf'=>$_SESSION['csrf']]; }
+function nh_state(): array { $draft=nh_read_draft(); $published=(string)file_get_contents(NH_ROOT.'/config.json'); return ['config'=>json_decode($draft,true,512,JSON_THROW_ON_ERROR),'draft_version'=>hash('sha256',$draft),'published_version'=>hash('sha256',$published),'csrf'=>$_SESSION['csrf'],'expires_in'=>nh_expires_in()]; }
 function nh_url(string $url): bool { return $url==='#' || (filter_var($url,FILTER_VALIDATE_URL)!==false && in_array(strtolower((string)parse_url($url,PHP_URL_SCHEME)),['http','https'],true)); }
 function nh_html(string $html): string {
     if (!class_exists('DOMDocument')) throw new InvalidArgumentException('Hosting potřebuje PHP rozšíření DOM/XML.');

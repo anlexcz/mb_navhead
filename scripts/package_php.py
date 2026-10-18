@@ -11,6 +11,7 @@ PUBLIC_FILES = (
     'fonts/montserrat.css', 'fonts/montserrat.js',
     'fonts/montserrat-latin-ext.woff2', 'fonts/OFL.txt',
     'admin/index.php', 'admin/view.php', 'admin/bootstrap.php',
+    'admin/login.php', 'admin/login-view.php', 'admin/logout.php', 'admin/session.mjs',
     'admin/api.php', 'admin/setup.php', 'admin/admin.js',
     'admin/admin.css', 'admin/admin-navigation.mjs', 'private/.htaccess',
 )

@@ -18,7 +18,7 @@ class PackageTest(unittest.TestCase):
             codes = []
             for path in archives:
                 with zipfile.ZipFile(path) as archive:
-                    self.assertEqual(len(archive.namelist()), 19)
+                    self.assertEqual(len(archive.namelist()), len(package.PUBLIC_FILES)+2)
                     for name in package.PUBLIC_FILES:
                         self.assertEqual(archive.read('navhead/' + name), (root / 'navhead' / name).read_bytes())
                     settings = archive.read('navhead/private/settings.php').decode()

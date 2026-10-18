@@ -5,6 +5,8 @@ NAVIGAČNÍ LIŠTA METROBUSU
 2. Otevři https://TVOJE-DOMENA/navhead/admin/setup.php.
 3. Zadej instalační kód a nastav heslo pro účet admin.
 4. Administrace je na https://TVOJE-DOMENA/navhead/admin/.
+   Přihlas se účtem admin a nastaveným heslem na přihlašovací stránce.
+   Odhlásit ukončí relaci; po 30 minutách nečinnosti vyprší automaticky.
 
 Instalační kód: {{INSTALL_TOKEN}}
 Po nastavení hesla přestane fungovat. Tento návod nech na počítači.

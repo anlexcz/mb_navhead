@@ -25,6 +25,18 @@ Rozbal ZIP, nahraj složku `navhead/` a otevři `/navhead/admin/setup.php`.
 Jednorázový instalační kód je v přiloženém `CTI-ME.txt`; tento návod
 nenahrávej na hosting. Nastav heslo účtu `admin` a otevři `/navhead/admin/`.
 
+Přihlášení používá účet `admin` a heslo nastavené při instalaci. Vlastní
+přihlašovací stránka nahradila dialog prohlížeče; existující heslový hash
+zůstává kompatibilní. Tlačítko **Odhlásit** ukončí relaci na serveru.
+Po 30 minutách nečinnosti relace vyprší. Automatické kontroly ji neprodlužují;
+aktivita uživatele ji prodlužuje nejvýše jednou za minutu. Cookie relace je
+HttpOnly a SameSite=Strict, přes HTTPS také Secure.
+
+Při automatickém odhlášení si panel ponechá neuložené změny v sessionStorage
+aktuálního panelu. Po opětovném přihlášení je obnoví, pokud se serverový draft
+mezitím nezměnil. Při konfliktu nabídne rozpracovanou verzi ke stažení.
+Samotné přihlašovací heslo se v JavaScriptu ani v úložišti prohlížeče neukládá.
+
 `Uložit draft` ukládá na server. `Publikovat` uloží a zveřejní změny pro
 připojené weby. `Stáhnout zálohu` stáhne právě upravovanou konfiguraci.
 
@@ -55,8 +67,9 @@ jednom místě; fonty ani skript nemusíš kopírovat na jednotlivé weby.
 Přiložený `.htaccess` nastavuje CORS pro použití na různých doménách.
 GitHub Pages nabízí [ukázku hlavičky](https://anlexcz.github.io/mb_navhead/)
 a [administraci s náhledem](https://anlexcz.github.io/mb_navhead/admin.html).
-Náhled používá stejné komponenty a editory jako hosting, ale ukládá jen do
-prohlížeče. PHP přihlášení a serverové publikování fungují na hostingu.
+Ukázka přihlášení používá veřejné údaje **admin / demo**. Skutečné heslo
+sem nezadávej. Náhled používá stejné komponenty a editory jako hosting, ale
+ukládá jen do prohlížeče; přihlášení a vypršení relace zde jen simuluje. PHP přihlášení a serverové publikování fungují na hostingu.
 
 Soubory `preview/`, kořenové HTML a přesměrování starých adres jsou pouze pro
 GitHub Pages. Do instalačního ZIPu nevstupují. Po změně `admin/view.php` nebo
@@ -67,4 +80,5 @@ jeho odkazů spusť `python3 scripts/build_preview.py`; nevzniká druhý editor.
 ```sh
 node --test tests/admin-navigation.test.mjs
 python3 tests/package_php_test.py
+python3 tests/auth_test.py  # potřebuje PHP
 ```

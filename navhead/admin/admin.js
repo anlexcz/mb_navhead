@@ -1,15 +1,37 @@
+import {monitorSession} from './session.mjs?v=cd97e32cf7ab';
 import '../metrobus-nav.js';
 import {locate, moveItem, keyError, renameItem} from './admin-navigation.mjs?v=0ad20181e91a';
 
 const $ = selector => document.querySelector(selector);
 const live = $('#live');
 const apiMeta = document.querySelector('meta[name="navhead-api"]');
-let serverState = null;
+let serverState = null, sessionMonitor, leaving=false;
+const apiURL = new URL(apiMeta.content,location.href);
+const loginURL = new URL(document.querySelector('meta[name="navhead-login"]').content,location.href);
+const recoveryKey = 'navhead-recovery:'+apiURL.href;
+function expiredSession() {
+  if (leaving) return;
+  leaving=true;sessionMonitor?.stop();
+  if (dirty && draft) {
+    try {sessionStorage.setItem(recoveryKey,JSON.stringify({config:draft,draft_version:serverState?.draft_version,published_version:serverState?.published_version}));}
+    catch {leaving=false;toast('Přihlášení vypršelo. Stáhni zálohu před obnovením stránky.');return;}
+  }
+  dirty=false;loginURL.searchParams.set('expired','1');location.replace(loginURL.href);
+}
+async function checkSession(touch=false) {
+  const url=new URL(apiURL);url.searchParams.set('session','1');
+  const options={credentials:'same-origin',cache:'no-store'};
+  if (touch) {options.method='POST';options.headers={'X-Navhead-CSRF':serverState.csrf};}
+  const response=await fetch(url,options);
+  if (!response.ok) {const error=new Error('Přihlášení vypršelo.');error.status=response.status;throw error;}
+  return response.json();
+}
 async function serverRequest(action, config) {
   const options = {credentials:'same-origin',cache:'no-store'};
   if (action) {options.method='POST';options.headers={'Content-Type':'application/json','X-Navhead-CSRF':serverState.csrf};options.body=JSON.stringify({action,config,draft_version:serverState.draft_version,published_version:serverState.published_version});}
   const response=await fetch(new URL(apiMeta.content,location.href),options);
   let result;try {result=await response.json();}catch {throw new Error('Server nevrátil platnou odpověď.');}
+  if (response.status===401) expiredSession();
   if (!response.ok) throw new Error(result.error||'Serverová chyba.');
   return result;
 }
@@ -164,55 +186,40 @@ $('#menu').addEventListener('dragend', finishDrag);
 $('#addLink').onclick = () => { const item = newLink(); draft.navigation.push(item); changed(); renderMenu(item.key); };
 $('#addGroup').onclick = () => { const item = {key: uid('group'), type:'group', label:'Nová skupina', enabled:true, children:[]}; draft.navigation.push(item); changed(); renderMenu(item.key); };
 function announcementEntry(item, index) {
-  return `<details class="entry" data-ann="${index}"><summary class="entry-summary"><span class="entry-copy"><span class="entry-title" data-ann-title>${esc(plain(item.html) || 'Nové oznámení')}</span><span class="entry-url" data-ann-status>${item.enabled === false ? 'Vypnuté' : 'Aktivní'}</span></span><span class="entry-cue" aria-hidden="true"></span></summary><div class="entry-body"><div class="formatbar"><button class="button" type="button" data-format="strong" aria-label="Tučné písmo"><strong>B</strong></button><button class="button" type="button" data-format="em" aria-label="Kurzíva"><em>I</em></button><button class="button" type="button" data-format="link">Odkaz</button><button class="button" type="button" data-format="br">Nový úsek</button><label class="url-label" for="link_${index}">Adresa</label><input id="link_${index}" type="url" data-link-url placeholder="https://" aria-label="Adresa odkazu pro vložení do oznámení"></div><label class="field"><span class="sr-only">Text oznámení</span><textarea data-ann-field="html" aria-label="Text oznámení">${esc(item.html)}</textarea></label><div class="editor-options"><label class="check"><input type="checkbox" data-ann-field="enabled"${checked(item.enabled !== false)}>Zobrazovat</label></div><div class="editor-footer"><button class="button quiet" type="button" data-ann-close>Zavřít</button><button class="button danger" type="button" data-ann-delete>Smazat</button></div></div></details>`;
-}
-function renderAnnouncements(openIndex) { $('#announcementsList').innerHTML = draft.announcements.map(announcementEntry).join('') || '<div class="empty">Žádná oznámení.</div>'; if (openIndex != null) { const entry = $('#announcementsList').querySelector(`[data-ann="${openIndex}"]`); entry.open = true; entry.querySelector('textarea').focus(); } }
-function updateAnnouncement(entry) { const item = draft.announcements[Number(entry.dataset.ann)]; item.html = entry.querySelector('textarea').value; item.enabled = entry.querySelector('[data-ann-field="enabled"]').checked; entry.querySelector('[data-ann-title]').textContent = plain(item.html) || 'Nové oznámení'; entry.querySelector('[data-ann-status]').textContent = item.enabled ? 'Aktivní' : 'Vypnuté'; changed(); }
-$('#announcementsList').addEventListener('input', event => { if (event.target.hasAttribute('data-ann-field')) updateAnnouncement(event.target.closest('[data-ann]')); });
-$('#announcementsList').addEventListener('click', event => {
-  const button = event.target.closest('button'); if (!button) return; const entry = button.closest('[data-ann]');
-  if (button.hasAttribute('data-ann-close')) { entry.open = false; entry.querySelector('summary').focus(); return; }
-  if (button.hasAttribute('data-ann-delete')) { draft.announcements.splice(Number(entry.dataset.ann), 1); changed(); renderAnnouncements(); return; }
-  if (!button.dataset.format) return;
-  const textarea = entry.querySelector('textarea'), kind = button.dataset.format, selected = textarea.value.slice(textarea.selectionStart, textarea.selectionEnd);
-  let insert;
-  if (kind === 'br') insert = '<br>';
-  else if (kind === 'link') { const url = entry.querySelector('[data-link-url]').value.trim(); if (!/^https?:\/\//i.test(url)) { toast('Vyplň adresu odkazu začínající https:// nebo http://.'); entry.querySelector('[data-link-url]').focus(); return; } insert = `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${selected || 'text odkazu'}</a>`; }
-  else insert = `<${kind}>${selected || 'text'}</${kind}>`;
-  textarea.setRangeText(insert, textarea.selectionStart, textarea.selectionEnd, 'end'); textarea.focus(); updateAnnouncement(entry);
-});
-$('#addAnnouncement').onclick = () => { draft.announcements.push({id: uid('ann'), html: '', enabled: true}); changed(); renderAnnouncements(draft.announcements.length - 1); };
-document.querySelectorAll('[data-tab]').forEach(button => button.onclick = () => { document.querySelectorAll('[data-tab]').forEach(tab => tab.removeAttribute('aria-current')); button.setAttribute('aria-current', 'page'); document.querySelectorAll('.tab-panel').forEach(panel => panel.hidden = panel.id !== button.dataset.tab); });
-const phone = matchMedia('(max-width:700px)'), preview = $('#preview');
-function showPreview(show) { preview.hidden = !show; $('#togglePreview').textContent = show ? 'Skrýt' : 'Zobrazit'; $('#togglePreview').setAttribute('aria-expanded', String(show)); }
-showPreview(!phone.matches);
-$('#togglePreview').onclick = () => showPreview(preview.hidden);
-document.querySelectorAll('[data-size]').forEach(button => button.onclick = () => { if (phone.matches) return; document.querySelectorAll('[data-size]').forEach(item => item.setAttribute('aria-pressed', String(item === button))); preview.className = `preview-stage ${button.dataset.size}`; });
-function validConfig(config) { return config && Array.isArray(config.navigation) && Array.isArray(config.announcements); }
-async function save() {
-  for (const input of $('#menu').querySelectorAll('[data-key-input]')) {
-    if (!applyKey(input)) {
-      toggleEditor(input.closest('[data-key]'), true);
-      input.reportValidity(); input.focus(); return false;
-    }
-  }
-  try {
-    serverState=await serverRequest('save',draft);draft=serverState.config;updatePreview();
-    dirty=false;$('#draftStatus').textContent='Uloženo';toast('Draft uložen.');return true;
-  } catch(error) {toast(error.message);return false;}
-}
-$('#saveDraft').onclick = save;
-if ($('#publishConfig')) $('#publishConfig').onclick = async () => {
-  const button=$('#publishConfig');button.disabled=true;
-  try {if (!await save()) return;serverState=await serverRequest('publish');dirty=false;$('#draftStatus').textContent='Publikováno';toast('Publikováno.');}
+  return `<details class="entry" data-ann="${index}"><summary class="entry-summary"><span class="entry-copy"><span class="entry-title" data-ann-title>${esc(plain(item.html) || 'Nové oznámení')}</span><span class="entry-url" data-ann-status>${item.enabled === false ? 'Vypnuté' : 'Aktivní'}</span></span><span class="entry-cue" aria-hidden="true"></span></summary><div class="entry-body"><div class="formatbar"><button class="button" type="button" data-format="strong" aria-label="Tučné písmo"><strong>B</strong></button><button class="button" type="button" data-format="em" aria-label="Kurzíva"><em>I</em></button><button class="button" type="button" data-format="link">Odkaz</button><button class="button" type="button" data-format="br">Nový úsek</button><label class="url-label" for="link_${index}">Adresa</label><input id="link_${index}" type="url" data-link-url placeholder="https://" aria-label="Adresa odkazu pro vložení do oznámení"></div><label class="field"><span class="sr-only">Text oznámení</span><textarea data-ann-field="html" aria-label="Text oznámení">${esc(item.html)}</textarea></label><div class="editor-options"><label class="check"><input type="checkbox" data-ann-field="enabled"${checked(item.enabled !== false)}>Zobrazovat</label></div><div class="editor-footer"><button cla…1122 tokens truncated…e=await serverRequest('publish');dirty=false;$('#draftStatus').textContent='Publikováno';toast('Publikováno.');}
   catch(error) {toast(error.message);}
   finally {button.disabled=false;}
 };
 $('#exportConfig').onclick = () => { const data = JSON.stringify(draft, null, 2) + '\n', url = URL.createObjectURL(new Blob([data], {type: 'application/json'})), link = document.createElement('a'); link.href = url; link.download = 'config.json'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); toast('Záloha stažena.'); };
+$('#logout').onclick = async () => {
+  if (dirty && !window.confirm('Odhlásit a zahodit neuložené změny?')) return;
+  const button=$('#logout');button.disabled=true;
+  try {
+    const response=await fetch(new URL('./logout.php',apiURL),{method:'POST',credentials:'same-origin',headers:{'X-Navhead-CSRF':serverState.csrf}});
+    if (!response.ok) throw new Error('Odhlášení se nezdařilo. Zkus to znovu.');
+    sessionMonitor?.stop();sessionStorage.removeItem(recoveryKey);dirty=false;location.replace(loginURL.href);
+  } catch(error) {toast(error.message);button.disabled=false;}
+};
 window.addEventListener('beforeunload', event => { if (dirty) { event.preventDefault(); event.returnValue = ''; } });
 try {
   serverState=await serverRequest();draft=serverState.config;
   if (!validConfig(draft)) throw new Error('Neplatná konfigurace.');
   function defaults(items) { for (const item of items) { if (item.type === 'link') item.target ??= '_blank'; if (item.children) defaults(item.children); } }
-  defaults(draft.navigation); updatePreview(); renderMenu(); renderAnnouncements(); $('#draftStatus').textContent = 'Uloženo';
+  let recovered=false;
+  try {
+    const stored=JSON.parse(sessionStorage.getItem(recoveryKey)||'null');
+    if (validConfig(stored?.config)) {
+      if (stored.draft_version===serverState.draft_version && stored.published_version===serverState.published_version) {
+        draft=stored.config;recovered=true;sessionStorage.removeItem(recoveryKey);
+      } else {
+        const button=document.createElement('button');button.className='button';button.textContent='Stáhnout rozpracovanou zálohu';
+        button.onclick=()=>{const a=document.createElement('a'),url=URL.createObjectURL(new Blob([JSON.stringify(stored.config,null,2)],{type:'application/json'}));a.href=url;a.download='rozpracovana-konfigurace.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+        $('.head-actions>div').append(button);toast('Na serveru jsou novější změny. Rozpracovanou verzi můžeš stáhnout jako zálohu.');
+      }
+    }
+  } catch { /* A closed tab or unavailable storage simply has no recovery. */ }
+  defaults(draft.navigation); updatePreview(); renderMenu(); renderAnnouncements(); $('#draftStatus').textContent = recovered ? 'Neuložené změny' : 'Uloženo';
+  dirty=recovered;if (recovered) toast('Neuložené změny obnoveny.');
+  $('#logout').disabled=false;
+  sessionMonitor=monitorSession({check:()=>checkSession(),touch:()=>checkSession(true),expire:expiredSession,expiresIn:serverState.expires_in});
 } catch (error) { $('#draftStatus').textContent = 'Chyba načítání'; $('#menu').textContent = error.message; document.querySelectorAll('#saveDraft,#exportConfig,#addLink,#addGroup,#addAnnouncement,#publishConfig').forEach(button => button.disabled = true); }
