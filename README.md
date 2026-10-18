@@ -1,5 +1,7 @@
 # Metrobus Navhead – kompletní specifikace
 
+**Nasazení na PHP hosting:** čistý instalační ZIP vytvoří `python3 scripts/package_php.py navhead-php.zip`. Na web patří jen jeho složka `navhead`, bez prototypů a složek s vývojovými verzemi. Podrobnosti: [hosting/php/README.md](hosting/php/README.md). Níže je vývojová specifikace a historie původních cest.
+
 Univerzální horní navigační proužek pro weby a aplikace Metrobusu.
 
 Navhead **není hlavička konkrétního webu**. Je to samostatná globální navigační vrstva Metrobusu vložená úplně nahoře, nad vlastní hlavičku, logo a menu konkrétní služby. Má proto zůstat nízká, vizuálně jednoduchá a snadno rozpoznatelná jako společný prvek celé rodiny webů.

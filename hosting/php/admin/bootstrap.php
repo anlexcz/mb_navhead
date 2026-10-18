@@ -31,8 +31,8 @@ function nh_atomic(string $file,string $contents): void {
     if (function_exists('opcache_invalidate') && substr($file,-4)==='.php') opcache_invalidate($file,true);
 }
 function nh_json(array $data): string { return json_encode($data,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT|JSON_THROW_ON_ERROR)."\n"; }
-function nh_read_draft(): string { $file=NH_PRIVATE.'/draft.php'; return is_file($file) ? substr((string)file_get_contents($file),strlen("<?php exit; ?>\n")) : (string)file_get_contents(NH_ROOT.'/v2/config.json'); }
-function nh_state(): array { $draft=nh_read_draft(); $published=(string)file_get_contents(NH_ROOT.'/v2/config.json'); return ['config'=>json_decode($draft,true,512,JSON_THROW_ON_ERROR),'draft_version'=>hash('sha256',$draft),'published_version'=>hash('sha256',$published),'csrf'=>$_SESSION['csrf']]; }
+function nh_read_draft(): string { $file=NH_PRIVATE.'/draft.php'; return is_file($file) ? substr((string)file_get_contents($file),strlen("<?php exit; ?>\n")) : (string)file_get_contents(NH_ROOT.'/config.json'); }
+function nh_state(): array { $draft=nh_read_draft(); $published=(string)file_get_contents(NH_ROOT.'/config.json'); return ['config'=>json_decode($draft,true,512,JSON_THROW_ON_ERROR),'draft_version'=>hash('sha256',$draft),'published_version'=>hash('sha256',$published),'csrf'=>$_SESSION['csrf']]; }
 function nh_url(string $url): bool { return $url==='#' || (filter_var($url,FILTER_VALIDATE_URL)!==false && in_array(strtolower((string)parse_url($url,PHP_URL_SCHEME)),['http','https'],true)); }
 function nh_html(string $html): string {
     if (!class_exists('DOMDocument')) throw new InvalidArgumentException('Hosting potřebuje PHP rozšíření DOM/XML.');

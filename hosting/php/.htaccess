@@ -9,7 +9,3 @@ AddType text/javascript .mjs
     Header set Cache-Control "no-cache"
   </FilesMatch>
 </IfModule>
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteRule ^v2/admin\.html$ admin/ [R=302,L]
-</IfModule>

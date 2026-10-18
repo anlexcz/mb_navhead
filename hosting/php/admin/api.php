@@ -11,7 +11,7 @@ try {
     $input=json_decode(file_get_contents('php://input',false,null,0,262145),true,512,JSON_THROW_ON_ERROR); $state=nh_state();
     if (!is_array($input) || ($input['draft_version'] ?? '')!==$state['draft_version'] || ($input['published_version'] ?? '')!==$state['published_version']) nh_fail(409,'Na serveru jsou novější změny. Nejdřív si stáhni svou konfiguraci a obnov stránku.');
     if (($input['action'] ?? '')==='save') nh_atomic(NH_PRIVATE.'/draft.php',"<?php exit; ?>\n".nh_json(nh_config($input['config'] ?? null)));
-    elseif (($input['action'] ?? '')==='publish') { $config=nh_config($state['config']); nh_atomic(NH_ROOT.'/v2/config.json',nh_json($config)); }
+    elseif (($input['action'] ?? '')==='publish') { $config=nh_config($state['config']); nh_atomic(NH_ROOT.'/config.json',nh_json($config)); }
     else nh_fail(400,'Neznámá akce.');
     echo nh_json(nh_state());
 } catch (InvalidArgumentException|JsonException $error) { nh_fail(422,$error->getMessage()); }
