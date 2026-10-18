@@ -40,10 +40,13 @@ Na kompaktním zobrazení se používá navigační výška `35px` a announcemen
 ## 2. Typografie
 
 - Primární font je **Montserrat**.
-- Produkční komponenta načítá řezy `500`, `600` a `700`.
+- Montserrat je součást projektu v `assets/fonts/montserrat-latin-ext.woff2` (variabilní řez 100–900, latinka včetně české diakritiky).
+- Sdílený modul `assets/fonts/montserrat.js` zavádí `montserrat.css` jednou do dokumentu; komponenty po načtení fontu přeměří mobilní položky.
+- Font se načítá ze stejného hostingu jako projekt. Google Fonts ani jiné externí fontové služby se nepoužívají.
+- Při nasazení komponenty je nutné zveřejnit i sousední složku `assets/fonts/`. Licence SIL OFL je v `assets/fonts/OFL.txt`.
 - Fallback je Arial / sans-serif.
 - Navigační položky jsou výrazné, ale navhead nesmí být typograficky těžký nebo vysoký.
-- Desktopové odkazy a ovládací prvky používají font-weight `700`.
+- Desktopové odkazy a ovládací prvky používají `13px`, font-weight `600`.
 - Kompaktní mobilní položky mají přibližně `13px`, weight `500`; Forendors je zvýrazněn weightem `600`.
 - `Další` používá přibližně `13px`, weight `600`.
 - Desktopový announcement používá přibližně `12.5px`, weight `600`.
@@ -99,7 +102,7 @@ Aktuální základní pořadí:
 ### Rozměry
 
 - Celková standardní výška navigace: `38px`, včetně spodního modrého proužku.
-- Hlavní položky mají horizontální padding přibližně `20px`.
+- Hlavní položky mají horizontální padding přibližně `12px`.
 - Mezi položkami je velmi malá mezera (`2px`).
 - Položky nemají vlastní rámečky ani zaoblení.
 
@@ -127,12 +130,12 @@ Na desktopu má Aplikace malou šipku dolů tvořenou CSS, nikoli textovým znak
 
 - se otevírá pod položkou,
 - je centrovaný vůči triggeru,
-- má šířku přibližně `230px`,
+- má šířku přibližně `200px`,
 - používá tmavé pozadí,
 - jemný border a stín,
 - vnitřní padding `5px`,
 - položky jsou zarovnané vlevo,
-- jednotlivá položka má minimální výšku přibližně `38px` a horizontální padding `12px`.
+- jednotlivá položka má minimální výšku přibližně `30px`, písmo `13px` s weightem `500` a horizontální padding `10px`.
 
 Dropdown se zpřístupňuje kliknutím a desktopově také hover/focus-within chováním.
 

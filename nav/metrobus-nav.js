@@ -1,3 +1,5 @@
+import { montserratReady } from '../assets/fonts/montserrat.js';
+
 const FALLBACK_CONFIG = {
   announcements: [
     { text: 'Na YouTube máme už 14 183 odběratelů! Všem vám moc děkujeme za podporu ❤️' }
@@ -18,7 +20,6 @@ const FALLBACK_CONFIG = {
 };
 
 const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap');
 
   :host {
     --mb-nav-bg: #25282d;
@@ -97,7 +98,7 @@ const styles = `
     justify-content:center;
   }
 
-  a,button{font:inherit;font-weight:700;letter-spacing:-.025em}
+  a,button{font:inherit;font-size:13px;font-weight:600;letter-spacing:-.025em}
 
   .item,.apps-trigger,.more-toggle{
     appearance:none;border:0;background:transparent;color:var(--mb-nav-text);
@@ -112,7 +113,7 @@ const styles = `
   .item.active:hover,.item.active:focus-visible,.apps-trigger.active:hover,.apps-trigger.active:focus-visible{color:var(--mb-nav-active-text)}
 
   .desktop-nav{display:flex;align-items:stretch;justify-content:center;gap:2px;width:100%}
-  .desktop-nav .item,.desktop-nav .apps-trigger{padding:0 20px}
+  .desktop-nav .item,.desktop-nav .apps-trigger{padding:0 12px}
   .apps-wrap{position:relative;display:flex}
 
   .apps-trigger::after,.more-toggle::after{
@@ -121,11 +122,11 @@ const styles = `
   }
 
   .dropdown{
-    position:absolute;top:100%;left:50%;transform:translateX(-50%);width:230px;padding:5px;
+    position:absolute;top:100%;left:50%;transform:translateX(-50%);width:200px;padding:5px;
     background:var(--mb-nav-bg);border:1px solid var(--mb-nav-border);box-shadow:0 10px 28px rgba(0,0,0,.24);display:none;
   }
   .apps-wrap.open .dropdown,.apps-wrap:hover .dropdown,.apps-wrap:focus-within .dropdown{display:block}
-  .dropdown .item{width:100%;min-height:38px;padding:0 12px;justify-content:flex-start}
+  .dropdown .item{width:100%;min-height:30px;padding:0 10px;font-size:13px;font-weight:500;justify-content:flex-start}
 
   .mobile-nav{display:none;width:100%;min-width:0;align-items:stretch;justify-content:center}
   .mobile-inline{display:flex;min-width:0;align-items:stretch;justify-content:center}
@@ -185,7 +186,7 @@ class MetrobusNav extends HTMLElement {
     document.addEventListener('click',this.handleOutsideClick);
     this.resizeObserver=new ResizeObserver(()=>this.handleResize());
     this.resizeObserver.observe(this);
-    document.fonts?.ready.then(()=>this.scheduleCompactLayout());
+    montserratReady.then(()=>this.scheduleCompactLayout());
     this.startAnnouncementRotation();
   }
 
