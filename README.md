@@ -108,7 +108,7 @@ Aktuální základní pořadí:
 
 ### Aktivní stav
 
-Aktivní služba se určuje atributem `active` na `<metrobus-nav>`. Aktivní hlavní položka má modré pozadí a tmavý text. Pokud je aktivní některá aplikace uvnitř skupiny Aplikace, jako aktivní se na desktopu vizuálně označí trigger **Aplikace**.
+Aktivní služba se určuje atributem `active` na `<metrobus-nav>`. Aktivní hlavní položka má modré pozadí a tmavý text. Pokud je aktivní některá aplikace uvnitř skupiny Aplikace, zvýrazní se pouze její odkaz v submenu. Trigger **Aplikace** zůstává neutrální; aktivní je pouze při explicitním `active="apps"`.
 
 ### Hover a focus
 

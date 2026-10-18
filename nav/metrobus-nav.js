@@ -215,7 +215,7 @@ class MetrobusNav extends HTMLElement {
   }
 
   get active(){return this.getAttribute('active')||''}
-  get appsActive(){return this.active==='apps'||this.config.apps.some(item=>item.id===this.active)}
+  get appsActive(){return this.active==='apps'}
 
   async loadConfig(){
     try{

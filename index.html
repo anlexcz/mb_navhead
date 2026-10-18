@@ -68,7 +68,7 @@
   <main>
     <section class="card">
       <h2>Živé demo</h2>
-      <p>Aktivní položku lze měnit atributem <code>active</code>. Pokud je aktivní konkrétní aplikace, zvýrazní se na desktopu položka <strong>Aplikace</strong>.</p>
+      <p>Aktivní položku lze měnit atributem <code>active</code>. Pokud je aktivní konkrétní aplikace, zvýrazní se pouze její odkaz v submenu. Tlačítko <strong>Aplikace</strong> zůstává neutrální.</p>
       <div class="controls">
         <button data-active="videa">Videa</button>
         <button data-active="studio">Studio</button>
@@ -86,7 +86,7 @@
     </section>
   </main>
 
-  <script type="module" src="./nav/metrobus-nav.js?v=20261018-compact"></script>
+  <script type="module" src="./nav/metrobus-nav.js?v=20261018-active"></script>
   <script>
     const nav = document.querySelector('#nav');
     document.querySelectorAll('[data-active]').forEach(button => {
