@@ -53,7 +53,14 @@ navigaci; povolená jsou písmena bez diakritiky, čísla, pomlčka a podtržít
 (1–100 znaků). Když ID změníš, uprav i atribut `active` na příslušném webu. Hlavička se spravuje na
 jednom místě; fonty ani skript nemusíš kopírovat na jednotlivé weby.
 Přiložený `.htaccess` nastavuje CORS pro použití na různých doménách.
-GitHub Pages PHP administraci nespustí; provozní aplikace patří na PHP hosting.
+GitHub Pages nabízí [ukázku hlavičky](https://anlexcz.github.io/mb_navhead/)
+a [administraci s náhledem](https://anlexcz.github.io/mb_navhead/admin.html).
+Náhled používá stejné komponenty a editory jako hosting, ale ukládá jen do
+prohlížeče. PHP přihlášení a serverové publikování fungují na hostingu.
+
+Soubory `preview/`, kořenové HTML a přesměrování starých adres jsou pouze pro
+GitHub Pages. Do instalačního ZIPu nevstupují. Po změně `admin/view.php` nebo
+jeho odkazů spusť `python3 scripts/build_preview.py`; nevzniká druhý editor.
 
 ## Ověření
 
