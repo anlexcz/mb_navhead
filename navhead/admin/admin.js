@@ -1,7 +1,6 @@
-import './metrobus-nav.js?v=20261018-php';
-import {locate, moveItem} from './admin-navigation.mjs?v=20261018-tree';
+import '../metrobus-nav.js';
+import {locate, moveItem} from './admin-navigation.mjs';
 
-const storageKey = 'metrobus-navhead-draft-v2';
 const $ = selector => document.querySelector(selector);
 const live = $('#live');
 const apiMeta = document.querySelector('meta[name="navhead-api"]');
@@ -153,10 +152,9 @@ document.querySelectorAll('[data-size]').forEach(button => button.onclick = () =
 function validConfig(config) { return config && Array.isArray(config.navigation) && Array.isArray(config.announcements); }
 async function save() {
   try {
-    if (apiMeta) {serverState=await serverRequest('save',draft);draft=serverState.config;updatePreview();}
-    else localStorage.setItem(storageKey,JSON.stringify(draft));
-    dirty=false;$('#draftStatus').textContent='Uloženo';toast(apiMeta?'Draft uložen na serveru.':'Draft uložen v tomto prohlížeči.');return true;
-  } catch(error) {toast(apiMeta?error.message:'Draft se nepodařilo uložit. Stáhni konfiguraci.');return false;}
+    serverState=await serverRequest('save',draft);draft=serverState.config;updatePreview();
+    dirty=false;$('#draftStatus').textContent='Uloženo';toast('Draft uložen.');return true;
+  } catch(error) {toast(error.message);return false;}
 }
 $('#saveDraft').onclick = save;
 if ($('#publishConfig')) $('#publishConfig').onclick = async () => {
@@ -165,13 +163,11 @@ if ($('#publishConfig')) $('#publishConfig').onclick = async () => {
   catch(error) {toast(error.message);}
   finally {button.disabled=false;}
 };
-$('#exportConfig').onclick = () => { const data = JSON.stringify(draft, null, 2) + '\n', url = URL.createObjectURL(new Blob([data], {type: 'application/json'})), link = document.createElement('a'); link.href = url; link.download = 'config.json'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); toast('Staženo. Změny nejsou publikované.'); };
+$('#exportConfig').onclick = () => { const data = JSON.stringify(draft, null, 2) + '\n', url = URL.createObjectURL(new Blob([data], {type: 'application/json'})), link = document.createElement('a'); link.href = url; link.download = 'config.json'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); toast('Záloha stažena.'); };
 window.addEventListener('beforeunload', event => { if (dirty) { event.preventDefault(); event.returnValue = ''; } });
 try {
-  const response = await fetch(new URL('./config.json', import.meta.url), {cache: 'no-cache'}); if (!response.ok) throw new Error('Konfiguraci nelze načíst.'); const published = await response.json(); if (!validConfig(published)) throw new Error('Neplatný formát konfigurace.');
-  let stored; try { stored = JSON.parse(localStorage.getItem(storageKey) || 'null'); } catch { /* Use published config when storage is unavailable or invalid. */ }
-  if (apiMeta) {serverState=await serverRequest();draft=serverState.config;}
-  else draft = validConfig(stored) ? stored : published;
+  serverState=await serverRequest();draft=serverState.config;
+  if (!validConfig(draft)) throw new Error('Neplatná konfigurace.');
   function defaults(items) { for (const item of items) { if (item.type === 'link') item.target ??= '_blank'; if (item.children) defaults(item.children); } }
   defaults(draft.navigation); updatePreview(); renderMenu(); renderAnnouncements(); $('#draftStatus').textContent = 'Uloženo';
 } catch (error) { $('#draftStatus').textContent = 'Chyba načítání'; $('#menu').textContent = error.message; document.querySelectorAll('#saveDraft,#exportConfig,#addLink,#addGroup,#addAnnouncement,#publishConfig').forEach(button => button.disabled = true); }

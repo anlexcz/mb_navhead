@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {locate, moveItem} from '../v2/admin-navigation.mjs';
+import {locate, moveItem} from '../navhead/admin/admin-navigation.mjs';
 const link = key => ({key, type:'link', label:key, url:'https://example.org/' + key, target:'_blank'});
 const fixture = () => [link('a'), {key:'g', type:'group', children:[link('b'),link('c')]}, link('d'), {key:'h', type:'group', children:[]}];
 const keys = array => array.map(item => item.key);

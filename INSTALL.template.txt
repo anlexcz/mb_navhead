@@ -1,0 +1,38 @@
+NAVIGAČNÍ LIŠTA METROBUSU
+
+1. Rozbal archiv. Na hosting přes FTP/SFTP nahraj pouze složku navhead,
+   včetně souborů .htaccess. Dej ji vedle současných souborů webu.
+2. Otevři https://TVOJE-DOMENA/navhead/admin/setup.php.
+3. Zadej instalační kód a nastav heslo pro účet admin.
+4. Administrace je na https://TVOJE-DOMENA/navhead/admin/.
+
+Instalační kód: {{INSTALL_TOKEN}}
+Po nastavení hesla přestane fungovat. Tento návod nech na počítači.
+
+Uložit draft: uloží změny na server, na webech se ještě neprojeví.
+Publikovat: uloží a zveřejní změny pro všechny připojené weby.
+Stáhnout zálohu: stáhne právě upravovanou konfiguraci do počítače.
+
+VLOŽENÍ NA WEB
+Do head vlož (nahraď doménu):
+<script type="module" src="https://TVOJE-DOMENA/navhead/metrobus-nav.js"></script>
+
+Na začátek body před vlastní hlavičku vlož:
+<metrobus-nav active="sotofoto"></metrobus-nav>
+
+active označuje aktuální web: metrobus, videa, studio, forendors, vyroci,
+kalendar, sotofoto nebo odkazy. Na jiném webu atribut vynech.
+Hlavička, font i data se načítají z jednoho místa. Databáze není potřeba.
+
+POŽADAVKY HOSTINGU
+PHP 8+, DOM/XML, sessions a HTTPS. PHP musí smět zapisovat do navhead
+(konfigurace) a navhead/private (nastavení a draft). Nepoužívej práva 777.
+Instalátor zkontroluje základní podmínky. Při chybě 500 ověř error log
+nebo podporu .htaccess. Pokud se PHP stáhne nebo zobrazí jako zdrojový kód,
+nejprve zapni jeho zpracování na hostingu.
+Pro vložení na jiné domény nastavuje .htaccess veřejným souborům CORS.
+Pokud ho server nepodporuje, hlavičku musí nastavit správce hostingu.
+
+Před připojením webů ověř přihlášení, uložení, publikování a mobilní náhled.
+Celou složku navhead pravidelně zálohuj; private obsahuje heslový hash.
+Při aktualizaci nepřepisuj config.json ani private svými instalačními kopiemi.

@@ -1,0 +1,5 @@
+navhead/private/*
+!navhead/private/.htaccess
+!navhead/private/settings.example.php
+*.zip
+__pycache__/
