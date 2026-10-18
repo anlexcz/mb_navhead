@@ -1,5 +1,5 @@
 import '../metrobus-nav.js';
-import {locate, moveItem} from './admin-navigation.mjs';
+import {locate, moveItem, keyError, renameItem} from './admin-navigation.mjs?v=0ad20181e91a';
 
 const $ = selector => document.querySelector(selector);
 const live = $('#live');
@@ -25,7 +25,7 @@ function card(key) { return [...$('#menu').querySelectorAll('[data-key]')].find(
 function dropSlot(parentKey = '', beforeKey = '') { return `<div class="drop-slot" data-drop-parent="${esc(parentKey)}" data-drop-before="${esc(beforeKey)}" aria-hidden="true"></div>`; }
 function itemEditor(item, parentKey) {
   const group = item.type === 'group';
-  return `<div class="item-editor" id="editor_${esc(item.key)}" hidden><div class="form-grid"><label class="field${group ? ' full' : ''}">Název<input data-field="label" value="${esc(item.label)}" autocomplete="off" required></label>${group ? '' : `<label class="field">Adresa<input data-field="url" value="${esc(item.url)}" type="url" placeholder="https://" autocomplete="off"></label>`}</div><div class="editor-options"><label class="check"><input data-field="enabled" type="checkbox"${checked(item.enabled !== false)}>Zobrazovat</label>${group ? '' : `<label class="check"><input data-field="target" type="checkbox"${checked(item.target !== '_self')}>Nový tab</label>`}</div>${group ? '' : `<label class="field location-field">Umístění<select data-parent><option value=""${parentKey == null ? ' selected' : ''}>Hlavní lišta</option>${draft.navigation.filter(group => group.type === 'group').map(group => `<option value="${esc(group.key)}"${parentKey === group.key ? ' selected' : ''}>${esc(group.label)}</option>`).join('')}</select></label>`}<div class="editor-footer"><button class="button quiet" type="button" data-close>Zavřít</button><button class="button danger" type="button" data-delete>Smazat</button></div></div>`;
+  return `<div class="item-editor" id="editor_${esc(item.key)}" hidden><div class="form-grid"><label class="field${group ? ' full' : ''}">Název<input data-field="label" value="${esc(item.label)}" autocomplete="off" required></label>${group ? '' : `<label class="field">Adresa<input data-field="url" value="${esc(item.url)}" type="url" placeholder="https://" autocomplete="off"></label>`}</div><label class="field key-field">ID<input data-key-input value="${esc(item.key)}" required maxlength="100" autocomplete="off" spellcheck="false" aria-describedby="hint_${esc(item.key)}"><small id="hint_${esc(item.key)}"><code data-active-example>active="${esc(item.key)}"</code> · Změnu přenes i na web.</small></label><div class="editor-options"><label class="check"><input data-field="enabled" type="checkbox"${checked(item.enabled !== false)}>Zobrazovat</label>${group ? '' : `<label class="check"><input data-field="target" type="checkbox"${checked(item.target !== '_self')}>Nový tab</label>`}</div>${group ? '' : `<label class="field location-field">Umístění<select data-parent><option value=""${parentKey == null ? ' selected' : ''}>Hlavní lišta</option>${draft.navigation.filter(group => group.type === 'group').map(group => `<option value="${esc(group.key)}"${parentKey === group.key ? ' selected' : ''}>${esc(group.label)}</option>`).join('')}</select></label>`}<div class="editor-footer"><button class="button quiet" type="button" data-close>Zavřít</button><button class="button danger" type="button" data-delete>Smazat</button></div></div>`;
 }
 function navEntry(item, index, length, parentKey = null) {
   const group = item.type === 'group', name = esc(item.label);
@@ -47,6 +47,42 @@ function renderMenu(openKey, focusKey) {
   else if (focusKey) card(focusKey)?.querySelector(':scope > .nav-row [data-edit]')?.focus();
 }
 function newLink() { return {key: uid('link'), type: 'link', label: 'Nový odkaz', url: 'https://', target: '_blank', enabled: true}; }
+function validateKey(input) {
+  const entry = input.closest('[data-key]');
+  const message = keyError(draft.navigation, entry.dataset.key, input.value);
+  input.setCustomValidity(message);
+  input.setAttribute('aria-invalid', String(Boolean(message)));
+  return !message;
+}
+function applyKey(input) {
+  if (!validateKey(input)) return false;
+  const entry = input.closest('[data-key]'), oldKey = entry.dataset.key, newKey = input.value;
+  if (oldKey === newKey) return true;
+  renameItem(draft.navigation, oldKey, newKey);
+  entry.dataset.key = newKey;
+  entry.querySelector(':scope > .item-editor').id = `editor_${newKey}`;
+  entry.querySelector(':scope > .nav-row [data-edit]').setAttribute('aria-controls', `editor_${newKey}`);
+  const hint = input.nextElementSibling;
+  hint.id = `hint_${newKey}`;
+  input.setAttribute('aria-describedby', hint.id);
+  hint.querySelector('[data-active-example]').textContent = `active="${newKey}"`;
+  for (const attribute of ['data-drop-parent', 'data-drop-before', 'data-children']) {
+    $('#menu').querySelectorAll(`[${attribute}]`).forEach(node => { if (node.getAttribute(attribute) === oldKey) node.setAttribute(attribute, newKey); });
+  }
+  $('#menu').querySelectorAll('[data-parent] option').forEach(option => { if (option.value === oldKey) option.value = newKey; });
+  if (live.getAttribute('active') === oldKey) live.setAttribute('active', newKey);
+  if (dragKey === oldKey) dragKey = newKey;
+  changed();
+  return true;
+}
+$('#menu').addEventListener('input', event => {
+  if (!event.target.matches('[data-key-input]')) return;
+  validateKey(event.target);
+  changed();
+});
+$('#menu').addEventListener('change', event => {
+  if (event.target.matches('[data-key-input]') && !applyKey(event.target)) event.target.reportValidity();
+});
 $('#menu').addEventListener('input', event => {
   const input = event.target.closest('[data-field]'); if (!input) return;
   const entry = input.closest('[data-key]'), item = locate(draft.navigation, entry.dataset.key)?.item; if (!item) return;
@@ -151,6 +187,12 @@ $('#togglePreview').onclick = () => showPreview(preview.hidden);
 document.querySelectorAll('[data-size]').forEach(button => button.onclick = () => { if (phone.matches) return; document.querySelectorAll('[data-size]').forEach(item => item.setAttribute('aria-pressed', String(item === button))); preview.className = `preview-stage ${button.dataset.size}`; });
 function validConfig(config) { return config && Array.isArray(config.navigation) && Array.isArray(config.announcements); }
 async function save() {
+  for (const input of $('#menu').querySelectorAll('[data-key-input]')) {
+    if (!applyKey(input)) {
+      toggleEditor(input.closest('[data-key]'), true);
+      input.reportValidity(); input.focus(); return false;
+    }
+  }
   try {
     serverState=await serverRequest('save',draft);draft=serverState.config;updatePreview();
     dirty=false;$('#draftStatus').textContent='Uloženo';toast('Draft uložen.');return true;

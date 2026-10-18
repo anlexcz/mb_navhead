@@ -38,3 +38,19 @@ test('dropping on itself or at its current position is a no-op', () => {
 test('group without a children array accepts its first link', () => {
   const nav=[link('a'),{key:'g',type:'group'}]; assert(moveItem(nav,'a','g')); assert.deepEqual(keys(nav),['g']); assert.deepEqual(keys(nav[0].children),['a']);
 });
+
+test('rename IDs across root and children while preserving group membership', async () => {
+  const {renameItem, keyError} = await import('../navhead/admin/admin-navigation.mjs');
+  const navigation = [{key:'apps',type:'group',children:[{key:'photo',type:'link'}]}, {key:'home',type:'link'}];
+  renameItem(navigation, 'photo', 'sotofoto');
+  renameItem(navigation, 'apps', 'aplikace');
+  assert.equal(locate(navigation, 'sotofoto').parent.key, 'aplikace');
+  assert.equal(locate(navigation, 'photo'), null);
+  assert.equal(keyError(navigation, 'home', 'home'), '');
+  for (const id of ['sotofoto', 'aplikace', '', 'šotofoto', 'two words', 'a'.repeat(101)]) {
+    assert.throws(() => renameItem(navigation, 'home', id));
+    assert.ok(locate(navigation, 'home'));
+  }
+  assert.ok(moveItem(navigation, 'home', 'aplikace', 'sotofoto'));
+  assert.deepEqual(navigation[0].children.map(item => item.key), ['home','sotofoto']);
+});

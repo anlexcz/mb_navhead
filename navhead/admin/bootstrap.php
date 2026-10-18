@@ -54,7 +54,9 @@ function nh_config($config): array {
     $keys=[]; $normalizeItems=function(array $items,int $depth=0) use (&$normalizeItems,&$keys): array {
         if (count($items)>80) throw new InvalidArgumentException('Příliš mnoho odkazů.'); $out=[];
         foreach ($items as $item) {
-            if (!is_array($item) || !is_string($item['key'] ?? null) || !preg_match('/^[a-zA-Z0-9_-]{1,100}$/D',$item['key']) || isset($keys[$item['key']]) || !is_string($item['label'] ?? null) || trim($item['label'])==='' || strlen($item['label'])>500) throw new InvalidArgumentException('Zkontroluj názvy a identifikátory položek.');
+            if (!is_array($item) || !is_string($item['key'] ?? null) || !preg_match('/^[a-zA-Z0-9_-]{1,100}$/D',$item['key'])) throw new InvalidArgumentException('ID: 1–100 znaků, bez diakritiky a mezer; povoleno je také - a _.');
+            if (isset($keys[$item['key']])) throw new InvalidArgumentException('Každá položka musí mít unikátní ID.');
+            if (!is_string($item['label'] ?? null) || trim($item['label'])==='' || strlen($item['label'])>500) throw new InvalidArgumentException('Zkontroluj názvy položek.');
             $keys[$item['key']]=true; $type=$item['type'] ?? '';
             if (!in_array($type,['link','group'],true) || ($depth && $type==='group')) throw new InvalidArgumentException('Skupiny nelze vnořovat.');
             $row=['key'=>$item['key'],'type'=>$type,'label'=>trim($item['label']),'enabled'=>($item['enabled'] ?? true)!==false];

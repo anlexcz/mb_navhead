@@ -27,3 +27,18 @@ export function moveItem(navigation, key, parentKey = null, beforeKey = null) {
   if (parent) parent.children = destination;
   return true;
 }
+
+export function keyError(navigation, oldKey, newKey) {
+  if (!/^[a-zA-Z0-9_-]{1,100}$/.test(newKey)) return 'ID: 1–100 znaků, bez diakritiky a mezer; povoleno je také - a _.';
+  if (oldKey !== newKey && locate(navigation, newKey)) return 'Toto ID už používá jiná položka.';
+  return '';
+}
+
+export function renameItem(navigation, oldKey, newKey) {
+  const source = locate(navigation, oldKey);
+  if (!source) throw new Error('Položka neexistuje.');
+  const error = keyError(navigation, oldKey, newKey);
+  if (error) throw new Error(error);
+  source.item.key = newKey;
+  return source.item;
+}

@@ -48,7 +48,9 @@ Na začátek `body` před vlastní hlavičku vlož:
 <metrobus-nav active="sotofoto"></metrobus-nav>
 ```
 
-`active` je klíč aktuální služby v konfiguraci. Hlavička se spravuje na
+`active` odpovídá poli **ID** v editoru položky. ID je jedinečné v celé
+navigaci; povolená jsou písmena bez diakritiky, čísla, pomlčka a podtržítko
+(1–100 znaků). Když ID změníš, uprav i atribut `active` na příslušném webu. Hlavička se spravuje na
 jednom místě; fonty ani skript nemusíš kopírovat na jednotlivé weby.
 Přiložený `.htaccess` nastavuje CORS pro použití na různých doménách.
 GitHub Pages PHP administraci nespustí; provozní aplikace patří na PHP hosting.

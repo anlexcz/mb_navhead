@@ -6,8 +6,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Navigační lišta Metrobusu</title>
 <link rel="stylesheet" href="../fonts/montserrat.css">
-<link rel="stylesheet" href="./admin.css">
-<script type="module" src="./admin.js"></script>
+<link rel="stylesheet" href="./admin.css?v=b21e0c88077e">
+<script type="module" src="./admin.js?v=57c0d9cc0458"></script>
 <meta name="navhead-api" content="./api.php">
 </head>
 <body>
