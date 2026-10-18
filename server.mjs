@@ -10,7 +10,7 @@ const root = fileURLToPath(new URL('.', import.meta.url));
 const password = process.env.NAVHEAD_ADMIN_PASSWORD;
 if (!password) throw new Error('Set NAVHEAD_ADMIN_PASSWORD before starting the server.');
 const passwordHash = createHash('sha256').update(password).digest();
-const types = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.woff2':'font/woff2','.txt':'text/plain; charset=utf-8'};
+const types = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.woff2':'font/woff2','.txt':'text/plain; charset=utf-8'};
 function authorized(header = '') {
   if (!header.startsWith('Basic ')) return false;
   const value = Buffer.from(header.slice(6), 'base64').toString('utf8'), colon = value.indexOf(':');

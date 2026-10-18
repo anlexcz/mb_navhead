@@ -4,7 +4,10 @@ Aktuální rozhraní je `v2/admin.html` s oddělenými `admin.css` a `admin.js`.
 `/admin/` na GitHub Pages přesměrovává na tento veřejný prototyp.
 
 - Dvě sekce: Navigace a Oznámení.
-- Úpravy probíhají přímo v rozbalené položce, bez modálních oken.
+- Podpoložky skupin jsou stále viditelné; jejich nastavení se otevírá odděleně přímo v řádku.
+- Táhnout lze pouze za úchyt vlevo. Přesun funguje mezi skupinami i mezi skupinou a hlavní lištou.
+- Čára ukazuje pozici vložení, zvýraznění skupiny znamená vložení dovnitř. Skupiny se nevnořují.
+- Šipky v řádku mění pořadí, volba Umístění v editoru přesouvá odkaz mezi úrovněmi bez tažení.
 - Stejný produkční `metrobus-nav-v2` vykresluje živý náhled.
 - Nové odkazy používají `target="_blank"` a `rel="noopener noreferrer"`; lze zvolit stejný tab.
 - Draft se ukládá ručně do localStorage pod `metrobus-navhead-draft-v2`.
@@ -31,3 +34,7 @@ a `PORT`. Server poskytuje soubory, nikoli API pro vzdálené publikování.
 GitHub Pages spouštět Node.js neumí a tento přístup heslem nechrání. Na Pages
 je proto rozhraní pouze veřejný prototyp. Pro aktivaci přihlášení je nutné
 nasadit `server.mjs` na server s Node.js a nastavit heslo mimo Git.
+
+## Kontrola přesunů
+
+`node --test tests/admin-navigation.test.mjs` ověřuje přesuny mezi úrovněmi, pořadí, zachování dat a zákaz vnořených skupin.

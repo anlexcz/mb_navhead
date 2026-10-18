@@ -3,23 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Správa navheadu · Metrobus</title>
+<title>Navigační lišta Metrobusu</title>
 <link rel="stylesheet" href="../assets/fonts/montserrat.css">
-<link rel="stylesheet" href="./admin.css?v=20261018-inline">
-<script type="module" src="./admin.js?v=20261018-inline"></script>
+<link rel="stylesheet" href="./admin.css?v=20261018-tree">
+<script type="module" src="./admin.js?v=20261018-tree"></script>
 </head>
 <body>
 <section class="preview-shell" aria-label="Živý náhled">
   <div class="preview-stage desktop" id="preview"><metrobus-nav-v2 id="live" active="sotofoto" manual-config></metrobus-nav-v2></div>
-  <div class="preview-tools"><strong>Živý náhled</strong><div class="segments" aria-label="Šířka náhledu"><button type="button" data-size="desktop" aria-pressed="true">Desktop</button><button type="button" data-size="tablet" aria-pressed="false">Tablet</button><button type="button" data-size="mobile" aria-pressed="false">Mobil</button><button type="button" id="togglePreview" aria-expanded="true">Skrýt</button></div></div>
+  <div class="preview-tools"><strong>Náhled</strong><div class="segments" aria-label="Šířka náhledu"><button type="button" data-size="desktop" aria-pressed="true">Desktop</button><button type="button" data-size="tablet" aria-pressed="false">Tablet</button><button type="button" data-size="mobile" aria-pressed="false">Mobil</button><button type="button" id="togglePreview" aria-expanded="true">Skrýt</button></div></div>
 </section>
-<header class="page-head"><div class="brand">METROBUS <span>/ SPRÁVA WEBŮ</span></div><div class="heading-row"><div><h1>Navigační lišta</h1><p>Odkazy a oznámení pro weby Metrobusu.</p></div><div class="head-actions"><button class="button" id="saveDraft" type="button">Uložit draft</button><button class="button primary" id="exportConfig" type="button">Stáhnout konfiguraci</button></div></div></header>
+<header class="page-head"><h1>Navigační lišta Metrobusu</h1><div class="head-actions"><div><button class="button" id="saveDraft" type="button">Uložit draft</button><button class="button primary" id="exportConfig" type="button" title="Stažení konfigurace změny na webu nepublikuje.">Stáhnout konfiguraci</button></div><small>Stažení změny nepublikuje.</small></div></header>
 <div class="workspace">
-  <div class="workspace-bar"><nav class="tabs" aria-label="Sekce administrace"><button type="button" data-tab="navigation" aria-current="page">Navigace <span id="navCount"></span></button><button type="button" data-tab="announcements">Oznámení <span id="annCount"></span></button></nav><span id="draftStatus" role="status">Načítám konfiguraci…</span></div>
-  <p class="storage-note">Draft se ukládá v tomto prohlížeči. Stažená konfigurace je určená k nahrání na web.</p>
+  <div class="workspace-bar"><nav class="tabs" aria-label="Sekce administrace"><button type="button" data-tab="navigation" aria-current="page">Navigace</button><button type="button" data-tab="announcements">Oznámení</button></nav><span id="draftStatus" role="status">Načítání…</span></div>
   <main>
-    <section id="navigation" class="tab-panel"><div class="section-heading"><div><h2>Odkazy v liště</h2><p>Kliknutím na položku otevřeš její nastavení. Pořadí změníš šipkami nebo přetažením.</p></div><div class="section-actions"><button type="button" class="button" id="addLink">+ Odkaz</button><button type="button" class="button" id="addGroup">+ Skupina</button></div></div><div id="menu" class="list"></div></section>
-    <section id="announcements" class="tab-panel" hidden><div class="section-heading"><div><h2>Oznámení nad lištou</h2><p>Krátké zprávy, které se střídají nad navigací.</p></div><button type="button" class="button" id="addAnnouncement">+ Oznámení</button></div><div id="announcementsList" class="list"></div></section>
+    <section id="navigation" class="tab-panel" aria-label="Navigace"><div class="section-actions"><button type="button" class="button" id="addLink">+ Odkaz</button><button type="button" class="button" id="addGroup">+ Skupina</button></div><div id="menu" class="nav-tree"></div></section>
+    <section id="announcements" class="tab-panel" aria-label="Oznámení" hidden><div class="section-actions"><button type="button" class="button" id="addAnnouncement">+ Oznámení</button></div><div id="announcementsList" class="list"></div></section>
   </main>
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
