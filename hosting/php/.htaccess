@@ -1,0 +1,15 @@
+Options -Indexes
+DirectoryIndex index.php index.html
+AddType text/javascript .mjs
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|mjs|css|json|woff2)$">
+    Header set Access-Control-Allow-Origin "*"
+  </FilesMatch>
+  <FilesMatch "config\.json$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^v2/admin\.html$ admin/ [R=302,L]
+</IfModule>

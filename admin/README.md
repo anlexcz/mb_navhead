@@ -38,3 +38,11 @@ nasadit `server.mjs` na server s Node.js a nastavit heslo mimo Git.
 ## Kontrola přesunů
 
 `node --test tests/admin-navigation.test.mjs` ověřuje přesuny mezi úrovněmi, pořadí, zachování dat a zákaz vnořených skupin.
+
+## PHP hosting
+
+`python3 scripts/package_php.py /cesta/navhead-php.zip` vytvoří samostatný balíček se složkou `navhead`, jednorázovým instalačním kódem a návodem. Kód i skutečné heslo zůstávají mimo Git. PHP 8+ s DOM/XML a sessions je nutné ověřit na hostingu.
+
+Overlay `hosting/php` poskytuje chráněné `/admin/`, první nastavení hesla a API pro sdílený draft i publikování. JSON a fonty zůstávají veřejné. Draft a hash hesla se ukládají do PHP souborů s blokovaným přístupem. Zápisy jsou atomické, používají zámek a kontrolu verzí; CSRF token chrání změny. Neplatné adresy a nebezpečné HTML jsou při uložení odmítnuté nebo odstraněné.
+
+Veřejný GitHub Pages prototyp dál používá localStorage a export; serverové funkce se aktivují jen v PHP šabloně administrace.
