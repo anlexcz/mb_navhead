@@ -4,7 +4,7 @@ Univerzální horní navigační proužek pro weby a aplikace Metrobusu.
 
 Navhead **není hlavička konkrétního webu**. Je to samostatná globální navigační vrstva Metrobusu vložená úplně nahoře, nad vlastní hlavičku, logo a menu konkrétní služby. Má proto zůstat nízká, vizuálně jednoduchá a snadno rozpoznatelná jako společný prvek celé rodiny webů.
 
-Tento dokument je referenční specifikace vzhledu, rozměrů, responsive chování a interakcí. Aktuální produkční implementace je `nav/metrobus-nav.js`.
+Tento dokument je referenční specifikace vzhledu, rozměrů, responsive chování a interakcí. Aktuální prototyp a administrace používají `v2/metrobus-nav.js`; starší kompatibilní implementace je v `nav/metrobus-nav.js`.
 
 ---
 
@@ -12,10 +12,10 @@ Tento dokument je referenční specifikace vzhledu, rozměrů, responsive chová
 
 - Navhead je plochý a hranatý. Nepoužívá karty, zaoblení ani „AI dashboard“ estetiku.
 - Nemá vlastní logo ani velký nadpis Metrobusu.
-- Pozadí navigace je tmavě šedé `#25282D`.
+- Pozadí navigace je tmavě šedé `#222222`.
 - Primární akcent Metrobusu je světle modrá `#87CEFA`.
 - Základní text navigace je bílý `#FFFFFF`.
-- Aktivní položka používá modré pozadí `#87CEFA` a tmavý text `#25282D`.
+- Aktivní položka používá modré pozadí `#87CEFA` a tmavý text `#222222`.
 - Hover/focus neaktivní položky mění text na `#87CEFA`.
 - Spodní hrana navigační části je zvýrazněna souvislým modrým pruhem o výšce `3px`.
 - Jemné oddělovače používají bílou s nízkou průhledností, aktuálně `rgba(255,255,255,.12)`.
@@ -24,10 +24,10 @@ Tento dokument je referenční specifikace vzhledu, rozměrů, responsive chová
 ### CSS tokeny
 
 ```css
---mb-nav-bg: #25282d;
+--mb-nav-bg: #222222;
 --mb-nav-blue: #87cefa;
 --mb-nav-text: #fff;
---mb-nav-active-text: #25282d;
+--mb-nav-active-text: #222222;
 --mb-nav-border: rgba(255,255,255,.12);
 --mb-nav-height: 38px;
 --mb-announcement-height: 34px;
@@ -343,3 +343,7 @@ Při budoucím vývoji mají být designové změny vědomé. Pokud se změní s
 3. případné související integrační pokyny.
 
 Administrátorské preview se samostatně „dorovnávat“ nesmí, protože používá tutéž produkční komponentu.
+
+## Aktuální administrace
+
+Rozhraní je v `v2/admin.html` (vstup také `/admin/`). Úpravy jsou inline, bez popupů; rozhraní obsahuje pouze navigaci a oznámení. Draft se ukládá do prohlížeče a konfiguraci lze stáhnout. Odkazy se standardně otevírají do nového tabu. Jeden účet `admin` s heslem podporuje volitelný `server.mjs`; GitHub Pages tuto ochranu nepodporuje. Podrobnosti jsou v `admin/README.md`.

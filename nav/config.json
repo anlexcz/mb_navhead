@@ -1,18 +1,65 @@
 {
   "announcements": [
-    { "text": "Na YouTube máme už 14 183 odběratelů! Všem vám moc děkujeme za podporu ❤️" }
+    {
+      "text": "Na YouTube máme už 14 183 odběratelů! Všem vám moc děkujeme za podporu ❤️"
+    }
   ],
   "main": [
-    { "id": "metrobus", "label": "Metrobus", "url": "https://metrobus.cz/" },
-    { "id": "videa", "label": "Videa", "url": "https://metrobus.cz/" },
-    { "id": "studio", "label": "Studio", "url": "https://metrobus.cz/studio" },
-    { "id": "forendors", "label": "Forendors", "url": "https://www.forendors.cz/metrobus", "priority": true },
-    { "id": "apps", "label": "Aplikace", "type": "apps" },
-    { "id": "odkazy", "label": "Odkazy", "url": "https://metrobus.cz/odkazy" }
+    {
+      "id": "metrobus",
+      "label": "Metrobus",
+      "url": "https://metrobus.cz/",
+      "target": "_blank"
+    },
+    {
+      "id": "videa",
+      "label": "Videa",
+      "url": "https://metrobus.cz/",
+      "target": "_blank"
+    },
+    {
+      "id": "studio",
+      "label": "Studio",
+      "url": "https://metrobus.cz/studio",
+      "target": "_blank"
+    },
+    {
+      "id": "forendors",
+      "label": "Forendors",
+      "url": "https://www.forendors.cz/metrobus",
+      "priority": true,
+      "target": "_blank"
+    },
+    {
+      "id": "apps",
+      "label": "Aplikace",
+      "type": "apps"
+    },
+    {
+      "id": "odkazy",
+      "label": "Odkazy",
+      "url": "https://metrobus.cz/odkazy",
+      "target": "_blank"
+    }
   ],
   "apps": [
-    { "id": "vyroci", "label": "Dopravní výročí", "url": "#" },
-    { "id": "kalendar", "label": "Šotoušův kalendář", "url": "#" },
-    { "id": "sotofoto", "label": "Šotofoto", "url": "#" }
+    {
+      "id": "vyroci",
+      "label": "Dopravní výročí",
+      "url": "#",
+      "target": "_blank"
+    },
+    {
+      "id": "kalendar",
+      "label": "Šotoušův kalendář",
+      "url": "#",
+      "target": "_blank"
+    },
+    {
+      "id": "sotofoto",
+      "label": "Šotofoto",
+      "url": "#",
+      "target": "_blank"
+    }
   ]
 }

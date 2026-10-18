@@ -22,10 +22,10 @@ const FALLBACK_CONFIG = {
 const styles = `
 
   :host {
-    --mb-nav-bg: #25282d;
+    --mb-nav-bg: #222222;
     --mb-nav-blue: #1fa8e8;
     --mb-nav-text: #fff;
-    --mb-nav-active-text: #25282d;
+    --mb-nav-active-text: #222222;
     --mb-nav-border: rgba(255,255,255,.12);
     --mb-nav-height: 38px;
     --mb-announcement-height: 34px;
@@ -232,7 +232,7 @@ class MetrobusNav extends HTMLElement {
 
   link(item,className='item',extraAttributes=''){
     const active=this.active===item.id?' active':'';
-    return `<a class="${className}${active}" href="${item.url||'#'}" data-id="${item.id}" ${extraAttributes}>${item.label}</a>`;
+    return `<a class="${className}${active}" href="${item.url||'#'}" target="${item.target||'_blank'}"${item.target!=='_self'?' rel="noopener noreferrer"':''} data-id="${item.id}" ${extraAttributes}>${item.label}</a>`;
   }
 
   renderDesktop(){

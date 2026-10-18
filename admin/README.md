@@ -1,15 +1,33 @@
-# Admin prototype – pravidla živého náhledu
+# Administrace navheadu
 
-## Produkční parita preview
+Aktuální rozhraní je `v2/admin.html` s oddělenými `admin.css` a `admin.js`.
+`/admin/` na GitHub Pages přesměrovává na tento veřejný prototyp.
 
-Živý náhled v administraci **není simulace ani druhá implementace navheadu**. Je to skutečná produkční komponenta `metrobus-nav`, pouze napojená na aktuální draftová data.
+- Dvě sekce: Navigace a Oznámení.
+- Úpravy probíhají přímo v rozbalené položce, bez modálních oken.
+- Stejný produkční `metrobus-nav-v2` vykresluje živý náhled.
+- Nové odkazy používají `target="_blank"` a `rel="noopener noreferrer"`; lze zvolit stejný tab.
+- Draft se ukládá ručně do localStorage pod `metrobus-navhead-draft-v2`.
+- Stažení konfigurace exportuje `config.json`. Samotný export nepublikuje změny na web.
+- Žádná maketa účtů, hesel ani historie.
 
-- Preview a publikované weby musí používat tentýž produkční renderer, CSS a responsive logiku.
-- Rozdíl smí být pouze ve zdroji konfigurace: preview = draft, produkce = publikovaná konfigurace.
-- Stejné musí být měření šířky, overflow `Další`, skupiny/submenu, announcementy, interakce, typografie, rozměry i barvy.
-- Změna produkční komponenty se musí automaticky projevit v preview; paralelní mock renderer je zakázán.
-- Akcent je `#87CEFA`.
-- Mobilní globální navhead nepoužívá hamburger. Ukazuje maximum hlavních položek, které se vejdou, a zbytek přesouvá do `Další`.
-- Preview o zvolené šířce musí odpovídat tomu, co při stejné šířce dostane produkční web.
+## Jeden účet admin
 
-Toto je architektonický invariant administrace.
+Skutečné přihlášení lze provozovat přes přiložený `server.mjs` na Node.js.
+Uživatelské jméno je `admin`, heslo určuje proměnná prostředí
+`NAVHEAD_ADMIN_PASSWORD`. Server se bez ní nespustí. Heslo se nikdy nezapisuje
+do HTML, JavaScriptu ani do repozitáře.
+
+```sh
+NAVHEAD_ADMIN_PASSWORD='vlastni-heslo' node server.mjs
+```
+
+Administrace je na `/admin/`; přihlášení obstará standardní přihlašovací dialog
+prohlížeče (HTTP Basic). Veřejná komponenta a konfigurace přihlášení nevyžadují.
+Přímá adresa `/v2/admin.html` má stejnou ochranu. Produkční server musí být za
+HTTPS reverzní proxy. Výchozí poslech je `127.0.0.1:3000`, lze změnit přes `HOST`
+a `PORT`. Server poskytuje soubory, nikoli API pro vzdálené publikování.
+
+GitHub Pages spouštět Node.js neumí a tento přístup heslem nechrání. Na Pages
+je proto rozhraní pouze veřejný prototyp. Pro aktivaci přihlášení je nutné
+nasadit `server.mjs` na server s Node.js a nastavit heslo mimo Git.
