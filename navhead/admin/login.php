@@ -22,4 +22,4 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
 header('Content-Type: text/html; charset=utf-8');
 $template=file_get_contents(__DIR__.'/login-view.php');
 $template=substr($template,strpos($template,'<!doctype html>'));
-echo str_replace(['{{CSRF}}','{{ERROR}}','{{DEMO_NOTE}}'],[nh_escape($_SESSION['csrf']),nh_escape($error),''],$template);
+echo str_replace(['{{CSRF}}','{{ERROR}}'],[nh_escape($_SESSION['csrf']),nh_escape($error)],$template);

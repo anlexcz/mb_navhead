@@ -21,7 +21,6 @@ def build():
     login = login[login.index('<!doctype html>'):]
     login = login.replace('../fonts/', './navhead/fonts/').replace('./admin.css', './navhead/admin/admin.css')
     login = login.replace('{{CSRF}}','preview').replace('{{ERROR}}','')
-    login = login.replace('{{DEMO_NOTE}}','<p class="login-note">Ukázka přihlášení: <strong>admin / demo</strong>.<br>Skutečné heslo sem nezadávej.</p>')
     login = login.replace('action="./login.php"','action="./admin.html"')
     login = login.replace('</head>', '<script type="module" src="./preview/login.js"></script></head>')
     login_hash=hashlib.sha256((ROOT/'preview/login.js').read_bytes()).hexdigest()[:12]

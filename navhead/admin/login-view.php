@@ -5,14 +5,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="referrer" content="same-origin">
-<title>Přihlášení · Navigační lišta Metrobusu</title>
+<title>Přihlášení · Správa navigace</title>
 <link rel="stylesheet" href="../fonts/montserrat.css">
 <link rel="stylesheet" href="./admin.css?v=63a8c8cc670e">
 </head>
 <body class="login-page">
 <main class="login-card">
-<h1>Navigační lišta Metrobusu</h1>
-{{DEMO_NOTE}}
+<h1>Správa navigace</h1>
 <p class="login-error" id="loginError" role="alert">{{ERROR}}</p>
 <form action="./login.php" method="post" id="loginForm">
 <input type="hidden" name="csrf" value="{{CSRF}}">
